@@ -1,3 +1,3 @@
-# Quran Repository
+# Quran Tracker
 
-This repository contains the pages of the Quran.
+This is a Quran Tracker.
