@@ -106,7 +106,7 @@ export const Reader = () => {
             </div>
 
             {/* Reader Container */}
-            <div className="flex-1 w-full overflow-y-auto bg-slate-50 dark:bg-slate-950 flex justify-center custom-scrollbar">
+            <div className="flex-1 w-full overflow-y-auto bg-[#fffcdd] dark:bg-[#fffcdd] flex justify-center custom-scrollbar">
                 <img
                     src={imageUrl}
                     alt={`Quran Page ${currentPage}`}
