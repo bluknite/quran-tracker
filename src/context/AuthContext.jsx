@@ -24,10 +24,14 @@ export const AuthProvider = ({ children }) => {
     }, [])
 
     const signInWithGoogle = async () => {
+        // Use import.meta.env.BASE_URL to correctly append /quran-tracker/ in production
+        const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '')
+        const redirectUrl = `${window.location.origin}${basePath}/`
+
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin
+                redirectTo: redirectUrl
             }
         })
         if (error) console.error('Sign-in error:', error.message)
