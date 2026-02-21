@@ -61,10 +61,10 @@ export const Reader = () => {
     const imageUrl = `${basePath}/quran-pages/page_${String(currentPage).padStart(3, '0')}.jpg`
 
     return (
-        <div className="flex flex-col h-full items-center relative gap-6">
+        <div className="flex flex-col h-full w-full items-center relative gap-4">
 
             {/* Controls Header */}
-            <div className="w-full max-w-3xl flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+            <div className="w-full flex justify-between items-center bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-sm border-b border-slate-200 dark:border-slate-800">
                 <div className="flex gap-2">
                     <button
                         onClick={goToNextPage}
@@ -106,11 +106,11 @@ export const Reader = () => {
             </div>
 
             {/* Reader Container */}
-            <div className="flex-1 w-full max-w-3xl overflow-y-auto bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 flex justify-center p-4 custom-scrollbar">
+            <div className="flex-1 w-full overflow-y-auto bg-slate-50 dark:bg-slate-950 flex justify-center custom-scrollbar">
                 <img
                     src={imageUrl}
                     alt={`Quran Page ${currentPage}`}
-                    className="max-h-full object-contain drop-shadow-md rounded-lg"
+                    className="max-h-full w-full max-w-5xl object-contain drop-shadow-md"
                     loading="lazy"
                 />
             </div>
