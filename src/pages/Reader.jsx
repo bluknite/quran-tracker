@@ -63,46 +63,14 @@ export const Reader = () => {
     return (
         <div className="flex flex-col h-full w-full items-center relative gap-0 bg-[#fffcdd] dark:bg-[#fffcdd]">
 
-            {/* Controls Header */}
-            <div className="w-full flex justify-between items-center bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-sm z-10 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex gap-2">
-                    <button
-                        onClick={goToNextPage}
-                        disabled={currentPage === 604}
-                        className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-                    >
-                        ← Next Page
-                    </button>
-
-                    <button
-                        onClick={goToPrevPage}
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-                    >
-                        Prev Page →
-                    </button>
-                </div>
-
+            {/* Top Display Header */}
+            <div className="w-full flex justify-center items-center bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-sm z-10 border-b border-slate-200 dark:border-slate-800">
                 <div className="text-center">
                     <span className="font-semibold text-slate-800 dark:text-slate-200">Page {currentPage}</span>
                     <div className="text-xs text-slate-500 dark:text-slate-400">
                         Surah {currentMapping?.start.surah}:{currentMapping?.start.ayah} - {currentMapping?.end.surah}:{currentMapping?.end.ayah}
                     </div>
                 </div>
-
-                <button
-                    onClick={saveProgress}
-                    disabled={isSaving || !user}
-                    className={`px-4 py-2 rounded-lg font-medium transition ${!user
-                        ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'
-                        : isSaving
-                            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30'
-                            : 'bg-emerald-500 text-white hover:bg-emerald-600'
-                        }`}
-                    title={!user ? "Sign in to save progress" : "Save current page"}
-                >
-                    {isSaving ? 'Saved!' : 'Save Progress'}
-                </button>
             </div>
 
             {/* Reader Container */}
@@ -113,6 +81,39 @@ export const Reader = () => {
                     className="max-h-full w-full max-w-5xl object-contain pt-4 pb-8"
                     loading="lazy"
                 />
+            </div>
+
+            {/* Bottom Utility Bar */}
+            <div className="w-full flex justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-10 border-t border-slate-200 dark:border-slate-800">
+                <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === 604}
+                    className="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
+                >
+                    ← Next
+                </button>
+
+                <button
+                    onClick={saveProgress}
+                    disabled={isSaving || !user}
+                    className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
+                        ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'
+                        : isSaving
+                            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30'
+                            : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'
+                        }`}
+                    title={!user ? "Sign in to save progress" : "Save current page"}
+                >
+                    {isSaving ? 'Saved!' : 'Save Progress'}
+                </button>
+
+                <button
+                    onClick={goToPrevPage}
+                    disabled={currentPage === 1}
+                    className="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
+                >
+                    Prev →
+                </button>
             </div>
 
         </div>
