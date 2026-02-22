@@ -38,8 +38,9 @@ async function backfill() {
     if (args.length === 0 || args[0] === '-h' || args[0] === '--help') {
         console.log(`
 Usage:
-  Manual entry: node scripts/backfill-history.js <user_id> <start_page> <end_page> <date>
-  Example:      node scripts/backfill-history.js 123e4567-e89b-12d3... 10 25 2026-02-22
+  Manual entry: node scripts/backfill-history.js <user_id> <start_page> <end_page> <date_or_timestamp>
+  Example 1:    node scripts/backfill-history.js 123e4567-e89b-12d3... 10 25 2026-02-22
+  Example 2:    node scripts/backfill-history.js 123e4567-e89b-12d3... 10 25 "2026-02-22T03:27:34-08:00"
 
   Auto-sync:    node scripts/backfill-history.js --auto
   (Fetches all users' current progress bookmarks and logs pages 1 to bookmark)
@@ -97,7 +98,7 @@ Usage:
     const userId = args[0]
     const startPage = parseInt(args[1], 10)
     const endPage = parseInt(args[2], 10)
-    const dateStr = args[3]
+    const dateStr = args.slice(3).join(' ')
 
     if (isNaN(startPage) || isNaN(endPage) || startPage > endPage) {
         console.error("Error: Invalid page range. Ensure start_page and end_page are numbers, and start_page <= end_page.")
