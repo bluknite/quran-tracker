@@ -44,18 +44,24 @@ export const Reader = () => {
         if (currentPage > 1) setCurrentPage(p => p - 1)
     }
 
-    // Save Progress manually or automatically
     const saveProgress = async () => {
         if (!user) return
         setIsSaving(true)
 
-        // We save the START of the current page as the progress point
+        // We save the START of the current page as the progress bookmark.
+        // So next time they load the app, they start exactly on this page.
         await updateUserProgress(user.id, currentMapping.start.surah, currentMapping.start.ayah)
 
-        // Log all pages read since the last save point in a single bulk operation
-        await logPageRangeRead(user.id, lastSavedPageRef.current, currentPage)
+        // Log all pages historically read since the last save point.
+        // We exclude the current page because they are technically still reading it.
+        // We only log if they moved forward (backwards means already read).
+        if (currentPage > lastSavedPageRef.current) {
+            const endPage = currentPage - 1
+            await logPageRangeRead(user.id, lastSavedPageRef.current, endPage)
+        }
 
-        // Update the reference point for the next bulk save
+        // Update the reference point for the next bulk save.
+        // Now, this current unread page becomes the start of the next range!
         lastSavedPageRef.current = currentPage
 
         // Update URL to match new saved state
