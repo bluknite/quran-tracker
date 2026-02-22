@@ -83,6 +83,7 @@ export const fetchReadingHistory = async (userId) => {
         .select('page_number, read_at')
         .eq('user_id', userId)
         .order('read_at', { ascending: false })
+        .order('page_number', { ascending: false })
 
     if (error) {
         console.error('Error fetching reading history:', error.message)
