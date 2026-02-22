@@ -67,7 +67,7 @@ export const Reader = () => {
             {/* Top Display Header Portaled to Navbar */}
             {document.getElementById('navbar-center-portal') && createPortal(
                 <div className="text-center pointer-events-auto mt-1">
-                    <div className="font-semibold text-slate-800 dark:text-slate-200 leading-tight">Page {currentPage}</div>
+                    <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight">Page {currentPage}</div>
                     <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
                         Surah {currentMapping?.start.surah}:{currentMapping?.start.ayah} - {currentMapping?.end.surah}:{currentMapping?.end.ayah}
                     </div>
@@ -86,11 +86,11 @@ export const Reader = () => {
             </div>
 
             {/* Bottom Utility Bar (Sticky) */}
-            <div className="fixed bottom-0 left-0 right-0 w-full flex justify-between items-center gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg p-4 px-4 sm:px-8 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-50 border-t border-slate-200/50 dark:border-slate-800/50">
+            <div className="fixed bottom-0 left-0 right-0 w-full flex justify-between items-center gap-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg p-4 px-4 sm:px-8 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-50 border-t border-slate-200/50 dark:border-slate-700/50">
                 <button
                     onClick={goToNextPage}
                     disabled={currentPage === 604}
-                    className="px-4 py-3 bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
+                    className="px-4 py-3 bg-slate-100/90 dark:bg-slate-700/90 text-slate-700 dark:text-slate-200 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-600 transition shrink-0 font-medium"
                 >
                     ← Next
                 </button>
@@ -112,7 +112,7 @@ export const Reader = () => {
                 <button
                     onClick={goToPrevPage}
                     disabled={currentPage === 1}
-                    className="px-4 py-3 bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
+                    className="px-4 py-3 bg-slate-100/90 dark:bg-slate-700/90 text-slate-700 dark:text-slate-200 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-600 transition shrink-0 font-medium"
                 >
                     Prev →
                 </button>

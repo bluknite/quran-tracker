@@ -3,7 +3,7 @@ import { Navbar } from './Navbar'
 
 export const Layout = () => {
     return (
-        <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans transition-colors duration-300">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
             <Navbar />
             <main className="flex-1 w-full relative">
                 <Outlet />
