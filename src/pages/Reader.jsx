@@ -80,7 +80,7 @@ export const Reader = () => {
                 <img
                     src={imageUrl}
                     alt={`Quran Page ${currentPage}`}
-                    className="max-h-full w-full max-w-5xl object-contain pt-4 pb-32"
+                    className="max-h-full w-full max-w-5xl object-contain pt-4 pb-28"
                     loading="lazy"
                 />
             </div>
