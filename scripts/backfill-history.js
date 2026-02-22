@@ -33,46 +33,106 @@ const findPageBySurahAyah = (surah, ayah) => {
 }
 
 async function backfill() {
-    console.log("Fetching current user progress...")
-    const { data: progressData, error: progressError } = await supabase
-        .from('user_progress')
-        .select('*')
+    const args = process.argv.slice(2)
 
-    if (progressError) {
-        console.error("Error fetching progress:", progressError)
+    if (args.length === 0 || args[0] === '-h' || args[0] === '--help') {
+        console.log(`
+Usage:
+  Manual entry: node scripts/backfill-history.js <user_id> <start_page> <end_page> <date>
+  Example:      node scripts/backfill-history.js 123e4567-e89b-12d3... 10 25 2026-02-22
+
+  Auto-sync:    node scripts/backfill-history.js --auto
+  (Fetches all users' current progress bookmarks and logs pages 1 to bookmark)
+        `.trim())
+        process.exit(0)
+    }
+
+    if (args[0] === '--auto') {
+        console.log("Starting Auto-Sync Backfill...")
+        const { data: progressData, error: progressError } = await supabase
+            .from('user_progress')
+            .select('*')
+
+        if (progressError) {
+            console.error("Error fetching progress:", progressError)
+            return
+        }
+
+        console.log(`Found ${progressData.length} progress records.`)
+
+        for (const record of progressData) {
+            const currentPage = findPageBySurahAyah(record.surah_number, record.ayah_number)
+            console.log(`User ${record.user_id} is on page ${currentPage}. Backfilling pages 1 to ${currentPage}...`)
+
+            const historyEntries = []
+            for (let p = 1; p <= currentPage; p++) {
+                historyEntries.push({
+                    user_id: record.user_id,
+                    page_number: p,
+                    read_at: record.updated_at || new Date().toISOString()
+                })
+            }
+
+            const { error: insertError } = await supabase
+                .from('reading_history')
+                .insert(historyEntries)
+
+            if (insertError) {
+                console.error(`Failed to backfill user ${record.user_id}:`, insertError.message)
+            } else {
+                console.log(`Successfully backfilled ${currentPage} pages.`)
+            }
+        }
+        console.log("Auto-sync complete.")
         return
     }
 
-    console.log(`Found ${progressData.length} progress records.`)
-
-    for (const record of progressData) {
-        const currentPage = findPageBySurahAyah(record.surah_number, record.ayah_number)
-        console.log(`User ${record.user_id} is on page ${currentPage}. Backfilling pages 1 to ${currentPage}...`)
-
-        const historyEntries = []
-        // Backfill pages distributing them arbitrarily into the past to make the graph look nice? 
-        // Or just log them all to the original `updated_at` date.
-        // For accuracy, we'll log them all with a timestamp of the progress's `updated_at`
-        for (let p = 1; p <= currentPage; p++) {
-            historyEntries.push({
-                user_id: record.user_id,
-                page_number: p,
-                read_at: record.updated_at || new Date().toISOString()
-            })
-        }
-
-        const { error: insertError } = await supabase
-            .from('reading_history')
-            .insert(historyEntries)
-
-        if (insertError) {
-            console.error(`Failed to backfill user ${record.user_id}:`, insertError.message)
-        } else {
-            console.log(`Successfully backfilled ${currentPage} pages for user ${record.user_id}.`)
-        }
+    // Manual Mode
+    if (args.length < 4) {
+        console.error("Error: Missing arguments for manual entry.")
+        console.error("Run 'node scripts/backfill-history.js --help' for usage instructions.")
+        process.exit(1)
     }
 
-    console.log("Backfill complete.")
+    const userId = args[0]
+    const startPage = parseInt(args[1], 10)
+    const endPage = parseInt(args[2], 10)
+    const dateStr = args[3]
+
+    if (isNaN(startPage) || isNaN(endPage) || startPage > endPage) {
+        console.error("Error: Invalid page range. Ensure start_page and end_page are numbers, and start_page <= end_page.")
+        process.exit(1)
+    }
+
+    let timestamp
+    try {
+        // If the user passes "2026-02-22", convert to valid ISO. Fallback to raw string if they provide a full TZ string.
+        timestamp = new Date(dateStr).toISOString()
+    } catch (e) {
+        console.error("Error: Invalid date format. Please use YYYY-MM-DD or a valid ISO string.")
+        process.exit(1)
+    }
+
+    console.log(`Manual Backfill: Adding pages ${startPage} to ${endPage} for user ${userId} on ${timestamp}...`)
+
+    const historyEntries = []
+    for (let p = startPage; p <= endPage; p++) {
+        historyEntries.push({
+            user_id: userId,
+            page_number: p,
+            read_at: timestamp
+        })
+    }
+
+    const { error: insertError } = await supabase
+        .from('reading_history')
+        .insert(historyEntries)
+
+    if (insertError) {
+        console.error(`Failed to manually insert entries:`, insertError.message)
+    } else {
+        console.log(`Successfully backfilled ${endPage - startPage + 1} pages for the user!`)
+    }
 }
 
 backfill()
