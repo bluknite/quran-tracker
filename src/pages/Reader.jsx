@@ -61,10 +61,10 @@ export const Reader = () => {
     const imageUrl = `${basePath}/quran-pages/page_${String(currentPage).padStart(3, '0')}.jpg`
 
     return (
-        <div className="flex flex-col h-full w-full items-center relative gap-0 bg-[#fffcdd] dark:bg-[#fffcdd]">
+        <div className="flex flex-col h-full w-full bg-[#fffcdd] dark:bg-[#fffcdd] overflow-hidden">
 
             {/* Top Display Header */}
-            <div className="w-full flex justify-center items-center bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-sm z-10 border-b border-slate-200 dark:border-slate-800">
+            <div className="w-full flex justify-center items-center bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-sm z-10 border-b border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="text-center">
                     <span className="font-semibold text-slate-800 dark:text-slate-200">Page {currentPage}</span>
                     <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -73,22 +73,22 @@ export const Reader = () => {
                 </div>
             </div>
 
-            {/* Reader Container */}
-            <div className="flex-1 w-full overflow-y-auto flex justify-center custom-scrollbar">
+            {/* Reader Container (Scrollable Region) */}
+            <div className="flex-1 w-full overflow-y-auto flex justify-center custom-scrollbar relative">
                 <img
                     src={imageUrl}
                     alt={`Quran Page ${currentPage}`}
-                    className="max-h-full w-full max-w-5xl object-contain pt-4 pb-8"
+                    className="max-h-full w-full max-w-5xl object-contain pt-4 pb-32"
                     loading="lazy"
                 />
             </div>
 
-            {/* Bottom Utility Bar */}
-            <div className="w-full flex justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-10 border-t border-slate-200 dark:border-slate-800">
+            {/* Bottom Utility Bar (Sticky) */}
+            <div className="fixed bottom-0 left-0 right-0 w-full flex justify-between items-center gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg p-4 px-4 sm:px-8 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-50 border-t border-slate-200/50 dark:border-slate-800/50">
                 <button
                     onClick={goToNextPage}
                     disabled={currentPage === 604}
-                    className="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
+                    className="px-4 py-3 bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
                 >
                     ← Next
                 </button>
@@ -97,10 +97,10 @@ export const Reader = () => {
                     onClick={saveProgress}
                     disabled={isSaving || !user}
                     className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
-                        ? 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'
+                        ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
                         : isSaving
-                            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30'
-                            : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'
+                            ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
+                            : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
                         }`}
                     title={!user ? "Sign in to save progress" : "Save current page"}
                 >
@@ -110,7 +110,7 @@ export const Reader = () => {
                 <button
                     onClick={goToPrevPage}
                     disabled={currentPage === 1}
-                    className="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
+                    className="px-4 py-3 bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 font-medium"
                 >
                     Prev →
                 </button>

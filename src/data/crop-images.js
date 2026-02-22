@@ -29,33 +29,31 @@ async function processImages() {
             const originalStats = fs.statSync(inputPath)
             const metadata = await sharp(inputPath).metadata()
 
-            const targetWidth = 1615
-            let leftOffset = 0
-
             if (pageNum >= 3) {
+                const targetWidth = 1615
+                let leftOffset = 0
                 // Even pages have the gutter on the Left. Odd pages have the gutter on the Right.
                 if (pageNum % 2 === 0) {
                     leftOffset = Math.max(0, metadata.width - targetWidth)
                 } else {
                     leftOffset = 0
                 }
+                const extractWidth = Math.min(metadata.width, targetWidth)
+
+                // Extract the precise horizontal frame without any vertical trimming
+                await sharp(inputPath)
+                    .extract({
+                        left: leftOffset,
+                        top: 0,
+                        width: extractWidth,
+                        height: metadata.height
+                    })
+                    .jpeg({ quality: 80, progressive: true })
+                    .toFile(outputPath)
             } else {
-                // Pages 1 and 2 are centered title pages, cut evenly from both sides
-                leftOffset = Math.max(0, Math.floor((metadata.width - targetWidth) / 2))
+                // Pages 1 and 2 are centered title pages, copy them natively
+                fs.copyFileSync(inputPath, outputPath)
             }
-
-            const extractWidth = Math.min(metadata.width, targetWidth)
-
-            // Extract the precise horizontal frame without any vertical trimming
-            await sharp(inputPath)
-                .extract({
-                    left: leftOffset,
-                    top: 0,
-                    width: extractWidth,
-                    height: metadata.height
-                })
-                .jpeg({ quality: 80, progressive: true })
-                .toFile(outputPath)
 
             const newStats = fs.statSync(outputPath)
             savedBytes += (originalStats.size - newStats.size)
