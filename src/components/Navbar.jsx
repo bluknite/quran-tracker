@@ -9,8 +9,8 @@ export const Navbar = () => {
     return (
         <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-slate-800 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16">
-                    <div className="flex items-center">
+                <div className="flex justify-between h-16 relative">
+                    <div className="flex items-center z-10 shrink-0">
                         <Link to="/" className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">
                             {isReading ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -24,7 +24,10 @@ export const Navbar = () => {
                         </Link>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    {/* Center Portal Target */}
+                    <div id="navbar-center-portal" className="absolute inset-0 pointer-events-none flex items-center justify-center"></div>
+
+                    <div className="flex items-center gap-4 z-10 shrink-0">
                         {user ? (
                             <div className="flex items-center gap-4">
                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">

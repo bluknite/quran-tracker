@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { updateUserProgress } from '../lib/db'
@@ -63,15 +64,16 @@ export const Reader = () => {
     return (
         <div className="flex flex-col h-full w-full bg-[#fffcdd] dark:bg-[#fffcdd] overflow-hidden">
 
-            {/* Top Display Header */}
-            <div className="w-full flex justify-center items-center bg-white dark:bg-slate-900 p-4 px-4 sm:px-8 shadow-sm z-10 border-b border-slate-200 dark:border-slate-800 shrink-0">
-                <div className="text-center">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">Page {currentPage}</span>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
+            {/* Top Display Header Portaled to Navbar */}
+            {document.getElementById('navbar-center-portal') && createPortal(
+                <div className="text-center pointer-events-auto mt-1">
+                    <div className="font-semibold text-slate-800 dark:text-slate-200 leading-tight">Page {currentPage}</div>
+                    <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
                         Surah {currentMapping?.start.surah}:{currentMapping?.start.ayah} - {currentMapping?.end.surah}:{currentMapping?.end.ayah}
                     </div>
-                </div>
-            </div>
+                </div>,
+                document.getElementById('navbar-center-portal')
+            )}
 
             {/* Reader Container (Scrollable Region) */}
             <div className="flex-1 w-full overflow-y-auto flex justify-center custom-scrollbar relative">
