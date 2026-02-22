@@ -58,7 +58,7 @@ export const Histogram = () => {
 
     return (
         <div className="w-full mt-10">
-            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 text-left flex justify-between items-center">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 px-2 text-left flex justify-between items-center">
                 <span>Reading Consistency (Last 14 Days)</span>
                 <span className="text-xs">{history.length} Pages Logged</span>
             </h3>
