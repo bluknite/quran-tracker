@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { updateUserProgress, logPageRead } from '../lib/db'
+import { updateUserProgress, logPageRangeRead } from '../lib/db'
 import pageMapping from '../data/page-verse-mapping.json'
 
 export const Reader = () => {
@@ -30,6 +30,7 @@ export const Reader = () => {
 
     const [currentPage, setCurrentPage] = useState(() => findPageBySurahAyah(initialSurah, initialAyah))
     const [isSaving, setIsSaving] = useState(false)
+    const lastSavedPageRef = useRef(currentPage)
 
     // Current page data
     const currentMapping = useMemo(() => pageMapping[currentPage], [currentPage])
@@ -51,8 +52,11 @@ export const Reader = () => {
         // We save the START of the current page as the progress point
         await updateUserProgress(user.id, currentMapping.start.surah, currentMapping.start.ayah)
 
-        // Log this specific reading event for the histogram
-        await logPageRead(user.id, currentPage)
+        // Log all pages read since the last save point in a single bulk operation
+        await logPageRangeRead(user.id, lastSavedPageRef.current, currentPage)
+
+        // Update the reference point for the next bulk save
+        lastSavedPageRef.current = currentPage
 
         // Update URL to match new saved state
         navigate(`/read?surah=${currentMapping.start.surah}&ayah=${currentMapping.start.ayah}`, { replace: true })

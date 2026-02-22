@@ -91,3 +91,34 @@ export const fetchReadingHistory = async (userId) => {
 
     return data || []
 }
+
+/**
+ * Logs a range of page read events to the reading_history table in a single bulk insert.
+ * @param {string} userId - The unique identifier of the user
+ * @param {number} startPage - The page to start logging from
+ * @param {number} endPage - The page to end logging at
+ */
+export const logPageRangeRead = async (userId, startPage, endPage) => {
+    if (!userId || !startPage || !endPage) return
+
+    const minPage = Math.min(startPage, endPage)
+    const maxPage = Math.max(startPage, endPage)
+
+    // Ensure we don't accidentally try to insert 600 pages at once if the user jumps around wildly
+    // We limit the array size to realistic reading session counts (e.g. max 100 pages mapped)
+    const pageRangeCount = Math.min((maxPage - minPage) + 1, 150)
+
+    // Create an array of row objects
+    const insertPayload = Array.from({ length: pageRangeCount }, (_, i) => ({
+        user_id: userId,
+        page_number: minPage + i
+    }))
+
+    const { error } = await supabase
+        .from('reading_history')
+        .insert(insertPayload)
+
+    if (error) {
+        console.error('Error logging page range:', error.message)
+    }
+}
