@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getUserProgress } from '../lib/db'
+import { Histogram } from '../components/Histogram'
 
 export const Home = () => {
     const { user } = useAuth()
@@ -68,6 +69,8 @@ export const Home = () => {
                     Continue Reading
                 </Link>
             </div>
+
+            {user && <Histogram />}
 
             {!user && (
                 <p className="text-sm text-slate-500 dark:text-slate-400">

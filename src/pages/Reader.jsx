@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { updateUserProgress } from '../lib/db'
+import { updateUserProgress, logPageRead } from '../lib/db'
 import pageMapping from '../data/page-verse-mapping.json'
 
 export const Reader = () => {
@@ -47,8 +47,12 @@ export const Reader = () => {
     const saveProgress = async () => {
         if (!user) return
         setIsSaving(true)
+
         // We save the START of the current page as the progress point
         await updateUserProgress(user.id, currentMapping.start.surah, currentMapping.start.ayah)
+
+        // Log this specific reading event for the histogram
+        await logPageRead(user.id, currentPage)
 
         // Update URL to match new saved state
         navigate(`/read?surah=${currentMapping.start.surah}&ayah=${currentMapping.start.ayah}`, { replace: true })

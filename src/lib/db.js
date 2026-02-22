@@ -50,3 +50,44 @@ export const updateUserProgress = async (userId, surahNumber, ayahNumber) => {
         console.error('Error updating progress:', error.message)
     }
 }
+
+/**
+ * Logs a specific page read event to the reading_history table.
+ * Used for generating the contribution histogram.
+ * @param {string} userId - The unique identifier of the user
+ * @param {number} pageNumber - The page number read
+ */
+export const logPageRead = async (userId, pageNumber) => {
+    if (!userId || !pageNumber) return
+
+    const { error } = await supabase
+        .from('reading_history')
+        .insert([{ user_id: userId, page_number: pageNumber }]) // read_at defaults to now()
+
+    if (error) {
+        console.error('Error logging page read:', error.message)
+    }
+}
+
+/**
+ * Fetches the user's reading history ledger.
+ * Returns an array of objects containing read_at timestamps and page_numbers.
+ * @param {string} userId - The unique identifier of the user
+ * @returns {Promise<Array<{ page_number: number, read_at: string }>>}
+ */
+export const fetchReadingHistory = async (userId) => {
+    if (!userId) return []
+
+    const { data, error } = await supabase
+        .from('reading_history')
+        .select('page_number, read_at')
+        .eq('user_id', userId)
+        .order('read_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching reading history:', error.message)
+        return []
+    }
+
+    return data || []
+}
