@@ -70,6 +70,22 @@ export const Reader = () => {
         setTimeout(() => setIsSaving(false), 1000)
     }
 
+    const finishKhatm = async () => {
+        if (!user) return
+        setIsSaving(true)
+
+        // Log the final remaining block, specifically INCLUDING page 604.
+        if (currentPage >= lastSavedPageRef.current) {
+            await logPageRangeRead(user.id, lastSavedPageRef.current, 604)
+        }
+
+        // Reset user progress back to Surah 1, Ayah 1
+        await updateUserProgress(user.id, 1, 1)
+
+        // Send the user to the Dashboard to see their updated histogram
+        navigate('/')
+    }
+
     // Format image URL (e.g. page_001.jpg, page_042.jpg, page_604.jpg)
     // Use import.meta.env.BASE_URL for GitHub Pages compatibility
     const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '')
@@ -109,19 +125,35 @@ export const Reader = () => {
                     ← Next
                 </button>
 
-                <button
-                    onClick={saveProgress}
-                    disabled={isSaving || !user}
-                    className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
-                        ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
-                        : isSaving
-                            ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
-                            : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
-                        }`}
-                    title={!user ? "Sign in to save progress" : "Save current page"}
-                >
-                    {isSaving ? 'Saved!' : 'Save Progress'}
-                </button>
+                {currentPage === 604 ? (
+                    <button
+                        onClick={finishKhatm}
+                        disabled={isSaving || !user}
+                        className={`flex-1 px-4 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2 ${!user
+                            ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
+                            : isSaving
+                                ? 'bg-amber-100/90 text-amber-600 dark:bg-amber-900/50'
+                                : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/20'
+                            }`}
+                        title={!user ? "Sign in to save progress" : "Complete your Khatm"}
+                    >
+                        {isSaving ? 'Logging...' : '✨ Finish Khatm ✨'}
+                    </button>
+                ) : (
+                    <button
+                        onClick={saveProgress}
+                        disabled={isSaving || !user}
+                        className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
+                            ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
+                            : isSaving
+                                ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
+                                : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
+                            }`}
+                        title={!user ? "Sign in to save progress" : "Save current page"}
+                    >
+                        {isSaving ? 'Saved!' : 'Save Progress'}
+                    </button>
+                )}
 
                 <button
                     onClick={goToPrevPage}
