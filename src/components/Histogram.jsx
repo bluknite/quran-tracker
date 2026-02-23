@@ -3,6 +3,42 @@ import { useAuth } from '../context/AuthContext'
 import { fetchReadingHistory } from '../lib/db'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
+import juzEndPages from '../data/juz-end-pages.json'
+
+// Custom shape renderer for the Juz Completion bubbles
+// This is drawn as a transparent overlay bar over normal bars
+const CustomJuzBubble = (props) => {
+    const { x, y, width, index, payload } = props;
+    const { juzsCompleted } = payload;
+
+    if (!juzsCompleted || juzsCompleted === 0) return null;
+
+    // We want the bubbles to float right above the bar. 
+    // Recharts passes `y` as the top of the green bar.
+    const bubbleWidth = 16;
+    const bubbleHeight = 8;
+    const spacing = 4;
+
+    // Center the bubble horizontally over the bar
+    const cx = x + (width / 2);
+
+    // Generate an array of bubbles for multiple completions in a single day
+    const bubbles = [];
+    for (let i = 0; i < juzsCompleted; i++) {
+        // Stack them upwards
+        const rectY = y - spacing - bubbleHeight - (i * (bubbleHeight + spacing));
+        const rectX = cx - (bubbleWidth / 2);
+
+        bubbles.push(
+            <g key={`bubble-${index}-${i}`}>
+                <rect x={rectX} y={rectY} width={bubbleWidth} height={bubbleHeight} rx={4} fill="#fbbf24" />
+            </g>
+        );
+    }
+
+    return <g>{bubbles}</g>;
+};
+
 export const Histogram = () => {
     const { user } = useAuth()
     const [history, setHistory] = useState([])
@@ -21,15 +57,15 @@ export const Histogram = () => {
 
     // Process history data into a daily aggregated bar chart
     const chartData = useMemo(() => {
-        const dayCounts = {}
+        const dayLogs = {}
 
-        // Populate historical read counts
+        // Group pages read by date
         history.forEach(entry => {
             const dateStr = entry.read_at.substring(0, 10)
-            if (!dayCounts[dateStr]) {
-                dayCounts[dateStr] = 0
+            if (!dayLogs[dateStr]) {
+                dayLogs[dateStr] = new Set()
             }
-            dayCounts[dateStr] += 1
+            dayLogs[dateStr].add(entry.page_number)
         })
 
         // Generate the last 14 days for a clean bar chart view
@@ -40,13 +76,78 @@ export const Histogram = () => {
             date.setDate(today.getDate() - i)
             const dateStr = date.toISOString().substring(0, 10)
 
+            const pagesReadToday = dayLogs[dateStr] ? dayLogs[dateStr].size : 0
+
+            // Calculate how many Juz boundaries were crossed today
+            let juzsCompleted = 0
+            if (dayLogs[dateStr]) {
+                dayLogs[dateStr].forEach(page => {
+                    if (juzEndPages.includes(page)) {
+                        juzsCompleted += 1
+                    }
+                })
+            }
+
             data.push({
                 date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                pages: dayCounts[dateStr] || 0
+                pages: pagesReadToday,
+                juzsCompleted: juzsCompleted
             })
         }
 
         return data
+    }, [history])
+
+    // Calculate dynamic reading forecast
+    const forecast = useMemo(() => {
+        if (!history || history.length === 0) return null
+
+        // 1. Find the start of the current cycle (most recent time they read Page 1)
+        // History is sorted newest first (DESC) from the database
+        let cycleStartIndex = history.findIndex(entry => entry.page_number === 1)
+
+        // If Page 1 isn't in history, assume their oldest record is the start of this tracked cycle
+        if (cycleStartIndex === -1) {
+            cycleStartIndex = history.length - 1
+        }
+
+        // The current cycle is everything from the newest entry down to the start index
+        const currentCycle = history.slice(0, cycleStartIndex + 1)
+        if (currentCycle.length === 0) return null
+
+        // 2. Extrapolate metrics
+        const startDate = new Date(currentCycle[currentCycle.length - 1].read_at)
+        const today = new Date()
+
+        // Calculate days elapsed (minimum 1 to avoid Infinity pace)
+        const msPerDay = 1000 * 60 * 60 * 24
+        const daysElapsed = Math.max(1, Math.ceil((today - startDate) / msPerDay))
+
+        // Find unique pages read in this cycle to handle re-reading the same page cleanly
+        const uniquePages = new Set(currentCycle.map(entry => entry.page_number))
+        const pagesRead = uniquePages.size
+
+        // Find furthest page reached
+        const maxPage = Math.max(...Array.from(uniquePages))
+        const pagesRemaining = 604 - maxPage
+
+        if (pagesRemaining <= 0) return { status: 'completed' }
+
+        // 3. Compute Pace & Completion Date
+        const pace = pagesRead / daysElapsed // pages per day
+        if (pace === 0) return null
+
+        const daysRemaining = Math.ceil(pagesRemaining / pace)
+
+        const completionDate = new Date()
+        completionDate.setDate(today.getDate() + daysRemaining)
+
+        return {
+            status: 'active',
+            daysRemaining,
+            completionDate: completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            pace: pace.toFixed(1)
+        }
     }, [history])
 
     if (!user) return null
@@ -58,10 +159,34 @@ export const Histogram = () => {
 
     return (
         <div className="w-full mt-10">
-            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 px-2 text-left flex justify-between items-center">
-                <span>Reading Consistency (Last 14 Days)</span>
-                <span className="text-xs">{history.length} Pages Logged</span>
-            </h3>
+            <div className="mb-4 px-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    {!forecast ? (
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 text-left">
+                            Reading Consistency (Last 14 Days)
+                        </h3>
+                    ) : forecast.status === 'completed' ? (
+                        <>
+                            <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 text-left">
+                                🎉 Khatm Completed!
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Start reading again to track your next milestone.</p>
+                        </>
+                    ) : (
+                        <>
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
+                                Est. Completion: {forecast.completionDate}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {forecast.daysRemaining} days remaining at {forecast.pace} pages/day
+                            </p>
+                        </>
+                    )}
+                </div>
+                <div className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                    {history.length} Total Pages Logged
+                </div>
+            </div>
 
             <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -87,13 +212,27 @@ export const Histogram = () => {
                                 backgroundColor: '#ffffff',
                                 color: '#0f172a'
                             }}
-                            formatter={(value) => [`${value} Pages`, 'Read']}
+                            formatter={(value, name) => {
+                                if (name === 'pages') return [`${value} Pages`, 'Read']
+                                if (name === 'juzsCompleted' && value > 0) return [`${value} Juz${value > 1 ? 's' : ''}`, 'Completed']
+                                return null
+                            }}
                         />
+                        {/* Main Reading Bar */}
                         <Bar
                             dataKey="pages"
+                            stackId="a"
                             fill="#10b981"
                             radius={[4, 4, 0, 0]}
                             maxBarSize={40}
+                        />
+                        {/* overlay invisible bar just to render customized SVG shape on top */}
+                        <Bar
+                            dataKey="juzsCompleted"
+                            stackId="a"
+                            fill="#fbbf24"
+                            shape={<CustomJuzBubble />}
+                            isAnimationActive={false}
                         />
                     </BarChart>
                 </ResponsiveContainer>

@@ -8,10 +8,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') })
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY // Service role key preferred for admin bypass, but anon works if RLS allows it
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl) {
-    console.error("Missing Supabase URL in .env.local")
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.error(`
+❌ ERROR: Missing Supabase Credentials in .env.local
+
+Because this script bypasses authentication to insert data for specific users,
+it requires the Supabase Service Role Key to bypass Row Level Security (RLS).
+
+Please add the following to your .env.local file:
+VITE_SUPABASE_URL="your-supabase-url"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
+
+You can find the Service Role Key in your Supabase Dashboard under:
+Project Settings -> API -> Project API keys -> service_role (secret)
+    `.trim())
     process.exit(1)
 }
 
