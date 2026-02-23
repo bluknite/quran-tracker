@@ -144,16 +144,32 @@ export const Reader = () => {
                         onClick={saveProgress}
                         disabled={isSaving || !user || currentPage <= lastSavedPageRef.current}
                         className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
-                                ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
-                                : (currentPage <= lastSavedPageRef.current)
-                                    ? 'bg-slate-100/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-500 cursor-default'
-                                    : isSaving
-                                        ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
-                                        : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
+                            ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
+                            : (currentPage <= lastSavedPageRef.current)
+                                ? 'bg-slate-100/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-500 cursor-default'
+                                : isSaving
+                                    ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
+                                    : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
                             }`}
-                        title={!user ? "Sign in to save progress" : currentPage <= lastSavedPageRef.current ? "Page already read" : "Save current page"}
+                        title={
+                            !user
+                                ? "Sign in to save progress"
+                                : currentPage < lastSavedPageRef.current
+                                    ? "Already read in current Khatm cycle"
+                                    : currentPage === lastSavedPageRef.current
+                                        ? "Advance to next page to save progress"
+                                        : "Save current page"
+                        }
                     >
-                        {isSaving ? 'Saved!' : currentPage <= lastSavedPageRef.current ? 'Already Read' : 'Save Progress'}
+                        {
+                            isSaving
+                                ? 'Saved!'
+                                : currentPage < lastSavedPageRef.current
+                                    ? 'Previously Read'
+                                    : currentPage === lastSavedPageRef.current
+                                        ? 'Flip page to save'
+                                        : 'Save Progress'
+                        }
                     </button>
                 )}
 
