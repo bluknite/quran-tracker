@@ -98,21 +98,21 @@ export const Histogram = () => {
         return data
     }, [history])
 
-    // Calculate dynamic reading forecast
-    const forecast = useMemo(() => {
-        if (!history || history.length === 0) return null
+    // Determine the current Khatm cycle (starts from the most recent Page 1)
+    const currentCycle = useMemo(() => {
+        if (!history || history.length === 0) return []
 
-        // 1. Find the start of the current cycle (most recent time they read Page 1)
-        // History is sorted newest first (DESC) from the database
         let cycleStartIndex = history.findIndex(entry => entry.page_number === 1)
 
-        // If Page 1 isn't in history, assume their oldest record is the start of this tracked cycle
         if (cycleStartIndex === -1) {
             cycleStartIndex = history.length - 1
         }
 
-        // The current cycle is everything from the newest entry down to the start index
-        const currentCycle = history.slice(0, cycleStartIndex + 1)
+        return history.slice(0, cycleStartIndex + 1)
+    }, [history])
+
+    // Calculate dynamic reading forecast
+    const forecast = useMemo(() => {
         if (currentCycle.length === 0) return null
 
         // 2. Extrapolate metrics
@@ -150,6 +150,25 @@ export const Histogram = () => {
         }
     }, [history])
 
+    const totalJuzCompleted = useMemo(() => {
+        const dayLogs = {}
+        currentCycle.forEach(entry => {
+            const dateStr = entry.read_at.substring(0, 10)
+            if (!dayLogs[dateStr]) {
+                dayLogs[dateStr] = new Set()
+            }
+            dayLogs[dateStr].add(entry.page_number)
+        })
+
+        let count = 0
+        Object.values(dayLogs).forEach(pages => {
+            pages.forEach(page => {
+                if (juzEndPages.includes(page)) count++
+            })
+        })
+        return count
+    }, [history])
+
     if (!user) return null
     if (loading) return (
         <div className="w-full flex justify-center py-8">
@@ -183,8 +202,15 @@ export const Histogram = () => {
                         </>
                     )}
                 </div>
-                <div className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-                    {history.length} Total Pages Logged
+                <div className="flex flex-col items-start sm:items-end gap-1.5">
+                    <div className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                        {currentCycle.length} Pages Logged
+                    </div>
+                    {totalJuzCompleted > 0 && (
+                        <div className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-md">
+                            {totalJuzCompleted} Juz Completed
+                        </div>
+                    )}
                 </div>
             </div>
 
