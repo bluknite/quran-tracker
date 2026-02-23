@@ -8,7 +8,11 @@ Built with modern web technologies, this tracker saves your position in the clou
 
 - **📖 Authentic Reading Experience**: High-quality, seamlessly cropped scans of the original Madani script pages.
 - **☁️ Cloud Sync**: Log in securely with Google via Supabase to save your exact reading progress permanently.
-- **📍 Precise Tracking**: Uses a verified `Page <-> Verse` JSON mapping algorithm to tell you exactly which Surah and Verse you are currently looking at on any given page.
+- **📍 Precise Tracking**: Uses a verified `Page <-> Verse` JSON mapping algorithm to track exactly which Surah, Ayah, and Juz you are currently reading.
+- **📊 Reading History Dashboard**: Visualizes your last 14 days of reading activity on an interactive Recharts histogram.
+- **🔮 Dynamic Forecaster**: Calculates your rolling reading pace and predicts exactly what date you will finish your current Khatm cycle.
+- **🌟 Juz Milestones**: Celebrates completed Juzs by rendering stacked amber bubbles floating above your daily reading bars.
+- **📱 Mobile Optimized**: Includes native left/right swipe touch gestures to turn pages on phones and tablets.
 - **🌙 True Dark Mode**: Automatically adapts to your system preferences with a custom creamy paper background that perfectly blends the page images.
 - **⚡ Lightning Fast**: The 604 page images were processed via a Node.js Sharp script to algorithmically crop out all asymmetric scanner gutters and text, dropping the repository's image size footprint by over 950 MB!
 
@@ -65,9 +69,20 @@ CREATE TABLE user_progress (
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now())
 );
 
+CREATE TABLE reading_history (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users NOT NULL,
+  page_number int NOT NULL,
+  read_at timestamp with time zone DEFAULT timezone('utc'::text, now())
+);
+
 -- RLS Policies
 ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own progress" ON user_progress FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own progress" ON user_progress FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own progress" ON user_progress FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+ALTER TABLE reading_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own history" ON reading_history FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own history" ON reading_history FOR INSERT WITH CHECK (auth.uid() = user_id);
 ```
