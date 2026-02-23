@@ -32,6 +32,10 @@ export const Reader = () => {
     const [isSaving, setIsSaving] = useState(false)
     const lastSavedPageRef = useRef(currentPage)
 
+    // Touch gesture tracking refs
+    const touchStartX = useRef(null)
+    const touchEndX = useRef(null)
+
     // Current page data
     const currentMapping = useMemo(() => pageMapping[currentPage], [currentPage])
 
@@ -42,6 +46,30 @@ export const Reader = () => {
 
     const goToPrevPage = () => {
         if (currentPage > 1) setCurrentPage(p => p - 1)
+    }
+
+    const handleTouchStart = (e) => {
+        touchEndX.current = null // Reset end position on new touch
+        touchStartX.current = e.targetTouches[0].clientX
+    }
+
+    const handleTouchMove = (e) => {
+        touchEndX.current = e.targetTouches[0].clientX
+    }
+
+    const handleTouchEnd = () => {
+        if (!touchStartX.current || !touchEndX.current) return
+
+        const deltaX = touchStartX.current - touchEndX.current
+        const SWIPE_THRESHOLD = 50 // Minimum distance in pixels to trigger a swipe
+
+        if (deltaX > SWIPE_THRESHOLD) {
+            // Swiped left -> Go to Prev Page (Follows right button)
+            goToPrevPage()
+        } else if (deltaX < -SWIPE_THRESHOLD) {
+            // Swiped right -> Go to Next Page (Follows left button)
+            goToNextPage()
+        }
     }
 
     const saveProgress = async () => {
@@ -106,7 +134,12 @@ export const Reader = () => {
             )}
 
             {/* Reader Container (Scrollable Region) */}
-            <div className="flex-1 w-full overflow-y-auto flex justify-center custom-scrollbar relative">
+            <div
+                className="flex-1 w-full overflow-y-auto flex justify-center custom-scrollbar relative"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
                 <img
                     src={imageUrl}
                     alt={`Quran Page ${currentPage}`}
