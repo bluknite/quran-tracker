@@ -55,13 +55,22 @@ export const Histogram = () => {
         loadHistory()
     }, [user])
 
+    // Helper to get local date string YYYY-MM-DD
+    const getLocalDateString = (dateInput) => {
+        const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        // Adjust for timezone offset to prevent late-night reads from bleeding
+        const offsetMs = d.getTimezoneOffset() * 60 * 1000;
+        const localDate = new Date(d.getTime() - offsetMs);
+        return localDate.toISOString().substring(0, 10);
+    }
+
     // Process history data into a daily aggregated bar chart
     const chartData = useMemo(() => {
         const dayLogs = {}
 
-        // Group pages read by date
+        // Group pages read by date using local time
         history.forEach(entry => {
-            const dateStr = entry.read_at.substring(0, 10)
+            const dateStr = getLocalDateString(entry.read_at)
             if (!dayLogs[dateStr]) {
                 dayLogs[dateStr] = new Set()
             }
@@ -74,7 +83,7 @@ export const Histogram = () => {
         for (let i = 13; i >= 0; i--) {
             const date = new Date(today)
             date.setDate(today.getDate() - i)
-            const dateStr = date.toISOString().substring(0, 10)
+            const dateStr = getLocalDateString(date)
 
             const pagesReadToday = dayLogs[dateStr] ? dayLogs[dateStr].size : 0
 
@@ -153,7 +162,7 @@ export const Histogram = () => {
     const totalJuzCompleted = useMemo(() => {
         const dayLogs = {}
         currentCycle.forEach(entry => {
-            const dateStr = entry.read_at.substring(0, 10)
+            const dateStr = getLocalDateString(entry.read_at)
             if (!dayLogs[dateStr]) {
                 dayLogs[dateStr] = new Set()
             }
