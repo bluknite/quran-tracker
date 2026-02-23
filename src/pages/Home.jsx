@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getUserProgress } from '../lib/db'
 import { Histogram } from '../components/Histogram'
+import quranMeta from '../data/quran-meta.json'
 
 export const Home = () => {
     const { user } = useAuth()
@@ -22,6 +23,28 @@ export const Home = () => {
         }
         loadProgress()
     }, [user])
+
+    const currentJuz = useMemo(() => {
+        if (!progress) return null
+
+        const { surah_number, ayah_number } = progress
+        const juzRefs = quranMeta.data.juzs.references
+
+        // Find the last Juz whose starting verse is before or exactly at our current verse
+        let juz = 1
+        for (let i = 0; i < juzRefs.length; i++) {
+            const ref = juzRefs[i]
+            if (
+                surah_number > ref.surah ||
+                (surah_number === ref.surah && ayah_number >= ref.ayah)
+            ) {
+                juz = i + 1
+            } else {
+                break
+            }
+        }
+        return juz
+    }, [progress])
 
     if (loading) {
         return (
@@ -48,6 +71,12 @@ export const Home = () => {
                 </h2>
 
                 <div className="flex flex-col gap-4 mb-8">
+                    <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                        <span className="text-slate-500 dark:text-slate-400">Current Juz</span>
+                        <span className="font-medium text-lg text-slate-900 dark:text-white">
+                            {currentJuz}
+                        </span>
+                    </div>
                     <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
                         <span className="text-slate-500 dark:text-slate-400">Current Surah</span>
                         <span className="font-medium text-lg text-slate-900 dark:text-white">
