@@ -72,7 +72,7 @@ export const KhatmProgress = () => {
     if (!khatm) return null // Caught by the redirect hook, just rendering fallback
 
     const isCompleted = khatm.status === 'completed'
-    const title = `[${khatm.khatm_number}] ${getKhatmName(khatm.khatm_number)}`
+    const surahName = getKhatmName(khatm.khatm_number)
 
     return (
         <div className="flex flex-col items-center justify-start h-full max-w-2xl mx-auto space-y-8 pb-16 px-4 sm:px-0">
@@ -84,9 +84,10 @@ export const KhatmProgress = () => {
             </div>
 
             {/* Title Section */}
-            <div className="text-center space-y-2 w-full">
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                    {title}
+            <div className="text-center w-full">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center justify-center gap-2 mb-2">
+                    <span className="text-xl sm:text-2xl font-normal text-slate-400 dark:text-slate-500">{khatm.khatm_number}</span>
+                    <span>{surahName}</span>
                 </h1>
                 {khatm.user_label && (
                     <p className="text-lg text-slate-600 dark:text-slate-400">

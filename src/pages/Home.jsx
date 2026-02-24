@@ -74,7 +74,7 @@ export const Home = () => {
 
     // Helper to render a Khatm card
     const renderKhatmCard = (khatm) => {
-        const title = `[${khatm.khatm_number}] ${getKhatmName(khatm.khatm_number)}`
+        const surahName = getKhatmName(khatm.khatm_number)
         return (
             <Link
                 key={khatm.id}
@@ -85,8 +85,9 @@ export const Home = () => {
                 <div className={`absolute top-0 left-0 w-1 h-full ${khatm.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
 
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                        {title}
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                        <span className="text-sm font-normal text-slate-400 dark:text-slate-500">{khatm.khatm_number}</span>
+                        <span>{surahName}</span>
                     </h3>
                     {khatm.status === 'active' ? (
                         <span className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-md font-medium border border-emerald-200 dark:border-emerald-500/20">Active</span>
