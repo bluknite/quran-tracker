@@ -21,6 +21,7 @@ export const Home = () => {
     const [loading, setLoading] = useState(true)
     const [isCreating, setIsCreating] = useState(false)
     const [newLabel, setNewLabel] = useState('')
+    const [showCreateForm, setShowCreateForm] = useState(false)
 
     useEffect(() => {
         const loadKhatms = async () => {
@@ -135,31 +136,9 @@ export const Home = () => {
                 </p>
             </div>
 
-            {/* Create New Khatm Form */}
-            <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-6 md:p-8 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
-                <h2 className="text-xl font-bold mb-4 text-slate-800 dark:text-slate-200">Start a New Khatm</h2>
-                <form onSubmit={handleCreateKhatm} className="flex flex-col sm:flex-row gap-4">
-                    <input
-                        type="text"
-                        value={newLabel}
-                        onChange={(e) => setNewLabel(e.target.value)}
-                        placeholder="Optional label (e.g. Ramadan 2025, Memorization)"
-                        className="flex-1 px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all placeholder:text-slate-400"
-                    />
-                    <button
-                        type="submit"
-                        disabled={isCreating}
-                        className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl shadow-sm shadow-emerald-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto"
-                    >
-                        {isCreating ? 'Creating...' : 'Start Reading →'}
-                    </button>
-                </form>
-            </div>
-
             {/* Active Khatms Grid */}
             {activeKhatms.length > 0 && (
-                <div className="w-full">
+                <div className="w-full mb-8">
                     <div className="flex items-center gap-3 mb-6 px-2">
                         <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center font-bold">
                             {activeKhatms.length}
@@ -171,6 +150,51 @@ export const Home = () => {
                     </div>
                 </div>
             )}
+
+            {/* Create New Khatm Section */}
+            <div className="w-full flex justify-center">
+                {!showCreateForm ? (
+                    <button
+                        onClick={() => setShowCreateForm(true)}
+                        className="px-8 py-3.5 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 font-medium rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        Start New Khatm
+                    </button>
+                ) : (
+                    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-6 md:p-8 relative overflow-hidden animate-fade-in">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Start a New Khatm</h2>
+                            <button
+                                onClick={() => {
+                                    setShowCreateForm(false)
+                                    setNewLabel('')
+                                }}
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <form onSubmit={handleCreateKhatm} className="flex flex-col sm:flex-row gap-4">
+                            <input
+                                type="text"
+                                value={newLabel}
+                                onChange={(e) => setNewLabel(e.target.value)}
+                                placeholder="Optional label (e.g. Ramadan 2025, Memorization)"
+                                className="flex-1 px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+                            />
+                            <button
+                                type="submit"
+                                disabled={isCreating}
+                                className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl shadow-sm shadow-emerald-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto flex justify-center items-center"
+                            >
+                                {isCreating ? 'Creating...' : 'Start Reading →'}
+                            </button>
+                        </form>
+                    </div>
+                )}
+            </div>
 
             {/* Completed Khatms Grid */}
             {completedKhatms.length > 0 && (
