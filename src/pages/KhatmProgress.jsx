@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getKhatm, updateKhatmLabel } from '../lib/db'
+import { getKhatm, updateKhatmLabel, logManualPageRangeRead } from '../lib/db'
 import { Histogram } from '../components/Histogram'
 import quranMeta from '../data/quran-meta.json'
 
@@ -24,6 +24,14 @@ export const KhatmProgress = () => {
     const [isEditingLabel, setIsEditingLabel] = useState(false)
     const [editLabelValue, setEditLabelValue] = useState('')
     const [savingLabel, setSavingLabel] = useState(false)
+
+    // Manual Log State
+    const [showManualEntry, setShowManualEntry] = useState(false)
+    const [manualStart, setManualStart] = useState('')
+    const [manualEnd, setManualEnd] = useState('')
+    const [manualDate, setManualDate] = useState(() => new Date().toISOString().split('T')[0])
+    const [manualLogLoading, setManualLogLoading] = useState(false)
+    const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0)
 
     useEffect(() => {
         const loadKhatm = async () => {
@@ -53,6 +61,31 @@ export const KhatmProgress = () => {
             console.error(error)
         } finally {
             setSavingLabel(false)
+        }
+    }
+
+    const handleManualSubmit = async (e) => {
+        e.preventDefault()
+        setManualLogLoading(true)
+        try {
+            const start = parseInt(manualStart)
+            const end = parseInt(manualEnd)
+            if (start > 0 && end > 0 && start <= 604 && end <= 604) {
+                // Parse date into full ISO format for Supabase
+                const [year, month, day] = manualDate.split('-')
+                const isoDate = new Date(year, month - 1, day, 12, 0, 0).toISOString()
+
+                await logManualPageRangeRead(user.id, khatm.id, start, end, isoDate)
+                setHistoryRefreshTrigger(prev => prev + 1)
+
+                // Keep accordion open but reset inputs for rapid entry
+                setManualStart('')
+                setManualEnd('')
+            }
+        } catch (err) {
+            console.error("Failed to log manually", err)
+        } finally {
+            setManualLogLoading(false)
         }
     }
 
@@ -203,13 +236,45 @@ export const KhatmProgress = () => {
                     >
                         Continue Reading
                     </Link>
+
+                    <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800/50">
+                        <button
+                            onClick={() => setShowManualEntry(!showManualEntry)}
+                            className="text-sm font-medium text-slate-500 hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 w-full"
+                        >
+                            <svg className={`w-4 h-4 transition-transform ${showManualEntry ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            Log Previous Reading
+                        </button>
+
+                        {showManualEntry && (
+                            <form onSubmit={handleManualSubmit} className="mt-4 flex flex-col gap-3 text-left animate-fade-in">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Start Page</label>
+                                        <input type="number" min="1" max="604" required value={manualStart} onChange={e => setManualStart(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="1" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">End Page</label>
+                                        <input type="number" min="1" max="604" required value={manualEnd} onChange={e => setManualEnd(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="10" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Date Read</label>
+                                    <input type="date" required value={manualDate} onChange={e => setManualDate(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+                                </div>
+                                <button type="submit" disabled={manualLogLoading} className="w-full py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30 rounded-lg text-sm font-medium transition-colors mt-1 disabled:opacity-50">
+                                    {manualLogLoading ? 'Saving...' : 'Save Manual Entry'}
+                                </button>
+                            </form>
+                        )}
+                    </div>
                 </div>
             )}
 
             <div className="w-full">
                 {/* Dynamically scope the histogram payload directly to this Khatm ID! */}
                 {/* Notice we pass the khatm param so History fetches scoped data */}
-                <Histogram khatm={khatm} />
+                <Histogram khatm={khatm} refreshTrigger={historyRefreshTrigger} />
             </div>
 
         </div>

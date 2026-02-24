@@ -195,6 +195,41 @@ export const logPageRangeRead = async (userId, khatmId, startPage, endPage) => {
 }
 
 /**
+ * Manually logs a range of page read events with a specific past date.
+ * If the page was already logged, this updates its timestamp to the new manual date.
+ * @param {string} userId - The unique identifier of the user
+ * @param {string} khatmId - The unique identifier of the Khatm
+ * @param {number} startPage - The page to start logging from
+ * @param {number} endPage - The page to end logging at
+ * @param {string} readAtDate - The ISO string representation of the date it was read
+ */
+export const logManualPageRangeRead = async (userId, khatmId, startPage, endPage, readAtDate) => {
+    if (!userId || !khatmId || !startPage || !endPage || !readAtDate) return
+
+    const minPage = Math.min(startPage, endPage)
+    const maxPage = Math.max(startPage, endPage)
+
+    // We allow larger ranges here since it's manual, but still cap it to prevent massive payloads (e.g. 604 for the whole Quran)
+    const pageRangeCount = Math.min((maxPage - minPage) + 1, 604)
+
+    const insertPayload = Array.from({ length: pageRangeCount }, (_, i) => ({
+        user_id: userId,
+        khatm_id: khatmId,
+        page_number: minPage + i,
+        read_at: readAtDate
+    }))
+
+    const { error } = await supabase
+        .from('reading_history')
+        .upsert(insertPayload, { onConflict: 'khatm_id, page_number', ignoreDuplicates: false })
+
+    if (error) {
+        console.error('Error logging manual page range:', error.message)
+        throw error
+    }
+}
+
+/**
  * Marks a Khatm as completed and records the finish timestamp.
  * @param {string} khatmId - The Khatm to complete
  */

@@ -39,7 +39,7 @@ const CustomJuzBubble = (props) => {
     return <g>{bubbles}</g>;
 };
 
-export const Histogram = ({ khatm }) => {
+export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
     const { user } = useAuth()
     const [history, setHistory] = useState([])
     const [loading, setLoading] = useState(true)
@@ -53,7 +53,7 @@ export const Histogram = ({ khatm }) => {
             setLoading(false)
         }
         loadHistory()
-    }, [user, khatm?.id])
+    }, [user, khatm?.id, refreshTrigger])
 
     // Helper to get local date string YYYY-MM-DD
     const getLocalDateString = (dateInput) => {
@@ -185,7 +185,7 @@ export const Histogram = ({ khatm }) => {
                                 Final 14 Days Reading Activity
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Completed {totalJuzCompleted} Juzs during this cycle.
+                                Completed {totalJuzCompleted} Juz during this cycle.
                             </p>
                         </>
                     ) : !forecast ? (
@@ -205,6 +205,12 @@ export const Histogram = ({ khatm }) => {
                 </div>
 
                 <div className="flex flex-col items-start sm:items-end gap-1.5">
+                    {totalJuzCompleted > 0 && (
+                        <div className="text-xs font-medium text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-500/10 px-2 flex items-center gap-1.5 py-1 rounded-md">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400"></div>
+                            {totalJuzCompleted} Juz Completed
+                        </div>
+                    )}
                     <div className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
                         {history.length} Pages Logged
                     </div>
@@ -237,7 +243,7 @@ export const Histogram = ({ khatm }) => {
                             }}
                             formatter={(value, name) => {
                                 if (name === 'pages') return [`${value} Pages`, 'Read']
-                                if (name === 'juzsCompleted' && value > 0) return [`${value} Juz${value > 1 ? 's' : ''}`, 'Completed']
+                                if (name === 'juzsCompleted' && value > 0) return [`${value} Juz`, 'Completed']
                                 return null
                             }}
                         />
