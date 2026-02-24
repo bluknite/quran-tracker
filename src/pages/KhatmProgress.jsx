@@ -78,11 +78,11 @@ export const KhatmProgress = () => {
 
                 await logManualPageRangeRead(user.id, khatm.id, start, end, isoDate)
 
-                // Fetch the updated history timeline to find the true chronologically latest page they have read
+                // Fetch the updated history timeline to find the furthest page they have read
                 const historyData = await fetchReadingHistory(khatm.id)
                 if (historyData && historyData.length > 0) {
-                    // Because fetchReadingHistory orders by read_at DESC, the 0-index is the latest physical date (and highest page on that date)
-                    const latestPage = historyData[0].page_number
+                    // We want the highest page number achieved in this Khatm, regardless of what date it was logged
+                    const latestPage = Math.max(...historyData.map(entry => entry.page_number))
                     const nextPage = Math.min(latestPage + 1, 604)
                     const nextMapping = pageMapping[nextPage]
 
