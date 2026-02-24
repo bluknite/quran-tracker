@@ -32,6 +32,14 @@ export const Reader = () => {
     const [isSaving, setIsSaving] = useState(false)
     const lastSavedPageRef = useRef(currentPage)
 
+    const [isSwipeEnabled, setIsSwipeEnabled] = useState(() => {
+        return localStorage.getItem('quran_swipe_enabled') === 'true'
+    })
+
+    useEffect(() => {
+        localStorage.setItem('quran_swipe_enabled', isSwipeEnabled)
+    }, [isSwipeEnabled])
+
     // Touch gesture tracking refs
     const touchStartX = useRef(null)
     const touchEndX = useRef(null)
@@ -58,6 +66,7 @@ export const Reader = () => {
     }
 
     const handleTouchEnd = () => {
+        if (!isSwipeEnabled) return
         if (!touchStartX.current || !touchEndX.current) return
 
         const deltaX = touchStartX.current - touchEndX.current
@@ -132,6 +141,24 @@ export const Reader = () => {
                 </div>,
                 document.getElementById('navbar-center-portal')
             )}
+
+            {/* Swipe Toggle Bar */}
+            <div className="w-full bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200/50 dark:border-slate-700/50 py-2 px-4 shadow-sm flex justify-center z-10">
+                <div className="w-full max-w-5xl flex justify-between items-center px-4">
+                    <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium tracking-wide">
+                        Enable swipe to turn pages
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={isSwipeEnabled}
+                            onChange={(e) => setIsSwipeEnabled(e.target.checked)}
+                        />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-500 shadow-inner"></div>
+                    </label>
+                </div>
+            </div>
 
             {/* Reader Container (Scrollable Region) */}
             <div
