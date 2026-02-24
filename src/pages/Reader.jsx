@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { updateUserProgress, logPageRangeRead } from '../lib/db'
+import { updateKhatmProgress, logPageRangeRead, finishKhatm } from '../lib/db'
 import pageMapping from '../data/page-verse-mapping.json'
 
 export const Reader = () => {
@@ -10,6 +10,7 @@ export const Reader = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
 
+    const khatmId = searchParams.get('khatmId')
     const initialSurah = parseInt(searchParams.get('surah')) || 1
     const initialAyah = parseInt(searchParams.get('ayah')) || 1
 
@@ -97,19 +98,19 @@ export const Reader = () => {
     }
 
     const saveProgress = async () => {
-        if (!user) return
+        if (!user || !khatmId) return
         setIsSaving(true)
 
         // We save the START of the current page as the progress bookmark.
         // So next time they load the app, they start exactly on this page.
-        await updateUserProgress(user.id, currentMapping.start.surah, currentMapping.start.ayah)
+        await updateKhatmProgress(khatmId, currentMapping.start.surah, currentMapping.start.ayah)
 
         // Log all pages historically read since the last save point.
         // We exclude the current page because they are technically still reading it.
         // We only log if they moved forward (backwards means already read).
         if (currentPage > lastSavedPageRef.current) {
             const endPage = currentPage - 1
-            await logPageRangeRead(user.id, lastSavedPageRef.current, endPage)
+            await logPageRangeRead(user.id, khatmId, lastSavedPageRef.current, endPage)
         }
 
         // Update the reference point for the next bulk save.
@@ -117,25 +118,28 @@ export const Reader = () => {
         lastSavedPageRef.current = currentPage
 
         // Update URL to match new saved state
-        navigate(`/read?surah=${currentMapping.start.surah}&ayah=${currentMapping.start.ayah}`, { replace: true })
+        navigate(`/read?khatmId=${khatmId}&surah=${currentMapping.start.surah}&ayah=${currentMapping.start.ayah}`, { replace: true })
 
         setTimeout(() => setIsSaving(false), 1000)
     }
 
-    const finishKhatm = async () => {
-        if (!user) return
+    const handleFinishKhatm = async () => {
+        if (!user || !khatmId) return
         setIsSaving(true)
 
         // Log the final remaining block, specifically INCLUDING page 604.
         if (currentPage >= lastSavedPageRef.current) {
-            await logPageRangeRead(user.id, lastSavedPageRef.current, 604)
+            await logPageRangeRead(user.id, khatmId, lastSavedPageRef.current, 604)
         }
 
         // Reset user progress back to Surah 1, Ayah 1
-        await updateUserProgress(user.id, 1, 1)
+        await updateKhatmProgress(khatmId, 1, 1)
+
+        // Mark Khatm as completed
+        await finishKhatm(khatmId)
 
         // Send the user to the Dashboard to see their updated histogram
-        navigate('/')
+        navigate(`/khatm/${khatmId}`)
     }
 
     // Format image URL (e.g. page_001.jpg, page_042.jpg, page_604.jpg)
@@ -204,7 +208,7 @@ export const Reader = () => {
 
                 {currentPage === 604 ? (
                     <button
-                        onClick={finishKhatm}
+                        onClick={handleFinishKhatm}
                         disabled={isSaving || !user}
                         className={`flex-1 px-4 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2 ${!user
                             ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'

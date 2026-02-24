@@ -39,21 +39,21 @@ const CustomJuzBubble = (props) => {
     return <g>{bubbles}</g>;
 };
 
-export const Histogram = () => {
+export const Histogram = ({ khatm }) => {
     const { user } = useAuth()
     const [history, setHistory] = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const loadHistory = async () => {
-            if (user) {
-                const data = await fetchReadingHistory(user.id)
+            if (user && khatm?.id) {
+                const data = await fetchReadingHistory(khatm.id)
                 setHistory(data)
             }
             setLoading(false)
         }
         loadHistory()
-    }, [user])
+    }, [user, khatm?.id])
 
     // Helper to get local date string YYYY-MM-DD
     const getLocalDateString = (dateInput) => {
@@ -78,7 +78,8 @@ export const Histogram = () => {
         })
 
         // Generate the last 14 days for a clean bar chart view
-        const today = new Date()
+        // If completed, freeze the chart relative to the completion date
+        const today = khatm?.completed_at ? new Date(khatm.completed_at) : new Date()
         const data = []
         for (let i = 13; i >= 0; i--) {
             const date = new Date(today)
@@ -105,27 +106,16 @@ export const Histogram = () => {
         }
 
         return data
-    }, [history])
+    }, [history, khatm?.completed_at])
 
-    // Determine the current Khatm cycle (starts from the most recent Page 1)
-    const currentCycle = useMemo(() => {
-        if (!history || history.length === 0) return []
-
-        let cycleStartIndex = history.findIndex(entry => entry.page_number === 1)
-
-        if (cycleStartIndex === -1) {
-            cycleStartIndex = history.length - 1
-        }
-
-        return history.slice(0, cycleStartIndex + 1)
-    }, [history])
-
-    // Calculate dynamic reading forecast
+    // Dynamic reading forecast
     const forecast = useMemo(() => {
-        if (currentCycle.length === 0) return null
+        // Only run forecaster for active khatms
+        if (!khatm || khatm.status === 'completed') return null
+        if (!history || history.length === 0) return null
 
-        // 2. Extrapolate metrics
-        const startDate = new Date(currentCycle[currentCycle.length - 1].read_at)
+        // 1. Extrapolate metrics
+        const startDate = new Date(khatm.created_at || history[history.length - 1].read_at)
         const today = new Date()
 
         // Calculate days elapsed (minimum 1 to avoid Infinity pace)
@@ -133,7 +123,7 @@ export const Histogram = () => {
         const daysElapsed = Math.max(1, Math.ceil((today - startDate) / msPerDay))
 
         // Find unique pages read in this cycle to handle re-reading the same page cleanly
-        const uniquePages = new Set(currentCycle.map(entry => entry.page_number))
+        const uniquePages = new Set(history.map(entry => entry.page_number))
         const pagesRead = uniquePages.size
 
         // Find furthest page reached
@@ -157,11 +147,11 @@ export const Histogram = () => {
             completionDate: completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
             pace: pace.toFixed(1)
         }
-    }, [history])
+    }, [history, khatm])
 
     const totalJuzCompleted = useMemo(() => {
         const dayLogs = {}
-        currentCycle.forEach(entry => {
+        history.forEach(entry => {
             const dateStr = getLocalDateString(entry.read_at)
             if (!dayLogs[dateStr]) {
                 dayLogs[dateStr] = new Set()
@@ -178,7 +168,7 @@ export const Histogram = () => {
         return count
     }, [history])
 
-    if (!user) return null
+    if (!user || !khatm) return null
     if (loading) return (
         <div className="w-full flex justify-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
@@ -189,17 +179,19 @@ export const Histogram = () => {
         <div className="w-full mt-10">
             <div className="mb-4 px-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
-                    {!forecast ? (
+                    {khatm.status === 'completed' ? (
+                        <>
+                            <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 text-left">
+                                Final 14 Days Reading Activity
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Completed {totalJuzCompleted} Juzs during this cycle.
+                            </p>
+                        </>
+                    ) : !forecast ? (
                         <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 text-left">
                             Reading Consistency (Last 14 Days)
                         </h3>
-                    ) : forecast.status === 'completed' ? (
-                        <>
-                            <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 text-left">
-                                🎉 Khatm Completed!
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Start reading again to track your next milestone.</p>
-                        </>
                     ) : (
                         <>
                             <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
@@ -211,15 +203,11 @@ export const Histogram = () => {
                         </>
                     )}
                 </div>
+
                 <div className="flex flex-col items-start sm:items-end gap-1.5">
                     <div className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-                        {currentCycle.length} Pages Logged
+                        {history.length} Pages Logged
                     </div>
-                    {totalJuzCompleted > 0 && (
-                        <div className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-md">
-                            {totalJuzCompleted} Juz Completed
-                        </div>
-                    )}
                 </div>
             </div>
 

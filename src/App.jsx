@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { Reader } from './pages/Reader'
+import { KhatmProgress } from './pages/KhatmProgress'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="khatm/:id" element={<KhatmProgress />} />
             <Route path="read" element={<Reader />} />
           </Route>
         </Routes>
