@@ -13,6 +13,24 @@ const getKhatmName = (khatmNumber) => {
     return surah ? surah.englishName : `Khatm ${khatmNumber}`
 }
 
+// Helper to determine Juz from current Surah and Ayah
+const getJuzNumber = (surah_number, ayah_number) => {
+    const juzRefs = quranMeta.data.juzs.references
+    let juz = 1
+    for (let i = 0; i < juzRefs.length; i++) {
+        const ref = juzRefs[i]
+        if (
+            surah_number > ref.surah ||
+            (surah_number === ref.surah && ayah_number >= ref.ayah)
+        ) {
+            juz = i + 1
+        } else {
+            break
+        }
+    }
+    return juz
+}
+
 export const Home = () => {
     const { user } = useAuth()
     const navigate = useNavigate()
@@ -108,7 +126,10 @@ export const Home = () => {
                         <>
                             <div className="text-sm text-slate-600 dark:text-slate-300">
                                 <span className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Current Progress</span>
-                                <span className="font-semibold">Surah {khatm.surah_number}:{khatm.ayah_number}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold">Surah {khatm.surah_number}:{khatm.ayah_number}</span>
+                                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">Juz {getJuzNumber(khatm.surah_number, khatm.ayah_number)}</span>
+                                </div>
                             </div>
                             <div className="text-right">
                                 <span className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Last Read</span>
