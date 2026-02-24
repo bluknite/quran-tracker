@@ -110,9 +110,12 @@ export const Home = () => {
                                 <span className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Current Progress</span>
                                 <span className="font-semibold">Surah {khatm.surah_number}:{khatm.ayah_number}</span>
                             </div>
-                            <span className="text-xs text-slate-400">
-                                {new Date(khatm.created_at).toLocaleDateString()}
-                            </span>
+                            <div className="text-right">
+                                <span className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Last Read</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    {new Date(khatm.last_read_at || khatm.created_at).toLocaleDateString()}
+                                </span>
+                            </div>
                         </>
                     ) : (
                         <div className="w-full text-xs text-slate-400 flex justify-between">
