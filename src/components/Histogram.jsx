@@ -78,12 +78,33 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
         })
 
         // Generate the last 14 days for a clean bar chart view
-        // If completed, freeze the chart relative to the completion date
-        const today = khatm?.completed_at ? new Date(khatm.completed_at) : new Date()
+        // 1. If completed, freeze the chart relative to the completion date
+        // 2. If active but history exists, anchor it to the most recent read date OR today, whichever is more recent contextually.
+        //    Actually, we want to show the last read date as the very end of the chart so it never looks blank.
+        // 3. Fallback to today.
+
+        let anchorDate = new Date()
+
+        if (khatm?.completed_at) {
+            anchorDate = new Date(khatm.completed_at)
+        } else if (history && history.length > 0) {
+            // Find the most recent date someone actually read a page in this Khatm.
+            // History is already sorted descending by read_at from fetchReadingHistory.
+            const mostRecentLogDate = new Date(history[0].read_at)
+
+            // If the latest read is more than 14 days ago, pull the anchor back to that day.
+            // That way they always see at least the last time they read.
+            // If they read recently, we still anchor to 'today' so the chart aligns to current time natively.
+            const ms14days = 14 * 24 * 60 * 60 * 1000
+            if (new Date() - mostRecentLogDate > ms14days) {
+                anchorDate = mostRecentLogDate
+            }
+        }
+
         const data = []
         for (let i = 13; i >= 0; i--) {
-            const date = new Date(today)
-            date.setDate(today.getDate() - i)
+            const date = new Date(anchorDate)
+            date.setDate(anchorDate.getDate() - i)
             const dateStr = getLocalDateString(date)
 
             const pagesReadToday = dayLogs[dateStr] ? dayLogs[dateStr].size : 0
