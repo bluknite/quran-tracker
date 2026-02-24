@@ -10,16 +10,42 @@ export const fetchKhatms = async (userId) => {
 
     const { data, error } = await supabase
         .from('khatms')
-        .select('*')
+        .select(`
+            *,
+            reading_history (read_at)
+        `)
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+        // Order foreign table to get the latest read_at first
+        .order('read_at', { foreignTable: 'reading_history', ascending: false })
+        .limit(1, { foreignTable: 'reading_history' })
 
     if (error) {
         console.error('Error fetching khatms:', error.message)
         return []
     }
 
-    return data || []
+    if (!data) return []
+
+    // Map through the results to assign a unified last_read_at date
+    const sortedKhatms = data.map(khatm => {
+        let lastReadDate = khatm.created_at // Fallback to creation date if no pages read yet
+        if (khatm.reading_history && khatm.reading_history.length > 0) {
+            lastReadDate = khatm.reading_history[0].read_at
+        }
+
+        // Remove the joined array so we don't bloat the frontend state
+        delete khatm.reading_history
+
+        return {
+            ...khatm,
+            last_read_at: lastReadDate
+        }
+    })
+
+    // Sort the final array by last_read_at descending
+    sortedKhatms.sort((a, b) => new Date(b.last_read_at) - new Date(a.last_read_at))
+
+    return sortedKhatms
 }
 
 /**
