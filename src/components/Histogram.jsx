@@ -136,12 +136,21 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
         if (!history || history.length === 0) return null
 
         // 1. Extrapolate metrics
-        const startDate = new Date(khatm.created_at || history[history.length - 1].read_at)
+        let startDateStr = khatm.created_at
+        if (history && history.length > 0) {
+            const oldestLogDate = history[history.length - 1].read_at
+            if (new Date(oldestLogDate) < new Date(startDateStr)) {
+                startDateStr = oldestLogDate
+            }
+        }
+        const startDate = new Date(startDateStr)
         const today = new Date()
 
-        // Calculate days elapsed (minimum 1 to avoid Infinity pace)
+        // Calculate days elapsed using local midnight boundaries to prevent time-of-day pace skew
+        const startLocal = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+        const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate())
         const msPerDay = 1000 * 60 * 60 * 24
-        const daysElapsed = Math.max(1, Math.ceil((today - startDate) / msPerDay))
+        const daysElapsed = Math.max(1, Math.floor((todayLocal - startLocal) / msPerDay) + 1)
 
         // Find unique pages read in this cycle to handle re-reading the same page cleanly
         const uniquePages = new Set(history.map(entry => entry.page_number))
