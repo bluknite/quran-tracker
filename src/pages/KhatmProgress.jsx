@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getKhatm, updateKhatmLabel, logManualPageRangeRead } from '../lib/db'
+import { getKhatm, updateKhatmLabel, logManualPageRangeRead, updateKhatmProgress, fetchReadingHistory } from '../lib/db'
 import { Histogram } from '../components/Histogram'
 import quranMeta from '../data/quran-meta.json'
+import pageMapping from '../data/page-verse-mapping.json'
 
 // Helper to get Surah name dynamically, looping every 114
 const getKhatmName = (khatmNumber) => {
@@ -76,6 +77,26 @@ export const KhatmProgress = () => {
                 const isoDate = new Date(year, month - 1, day, 12, 0, 0).toISOString()
 
                 await logManualPageRangeRead(user.id, khatm.id, start, end, isoDate)
+
+                // Fetch the updated history timeline to find the true chronologically latest page they have read
+                const historyData = await fetchReadingHistory(khatm.id)
+                if (historyData && historyData.length > 0) {
+                    // Because fetchReadingHistory orders by read_at DESC, the 0-index is the latest physical date (and highest page on that date)
+                    const latestPage = historyData[0].page_number
+                    const nextPage = Math.min(latestPage + 1, 604)
+                    const nextMapping = pageMapping[nextPage]
+
+                    if (nextMapping) {
+                        await updateKhatmProgress(khatm.id, nextMapping.start.surah, nextMapping.start.ayah)
+                        // Trigger a local UI re-render so "Current Progress" updates immediately
+                        setKhatm(prev => ({
+                            ...prev,
+                            surah_number: nextMapping.start.surah,
+                            ayah_number: nextMapping.start.ayah
+                        }))
+                    }
+                }
+
                 setHistoryRefreshTrigger(prev => prev + 1)
 
                 // Keep accordion open but reset inputs for rapid entry
