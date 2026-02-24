@@ -101,6 +101,25 @@ export const updateKhatmProgress = async (khatmId, surahNumber, ayahNumber) => {
 }
 
 /**
+ * Updates the user_label for a specific Khatm.
+ * @param {string} khatmId - The unique identifier of the Khatm
+ * @param {string} newLabel - The new label to set
+ */
+export const updateKhatmLabel = async (khatmId, newLabel) => {
+    if (!khatmId) return
+
+    const { error } = await supabase
+        .from('khatms')
+        .update({ user_label: newLabel })
+        .eq('id', khatmId)
+
+    if (error) {
+        console.error('Error updating khatm label:', error.message)
+        throw error
+    }
+}
+
+/**
  * Logs a specific page read event to the reading_history table.
  * Used for generating the contribution histogram.
  * @param {string} userId - The unique identifier of the user
