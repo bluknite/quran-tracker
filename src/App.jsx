@@ -4,10 +4,12 @@ import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { Reader } from './pages/Reader'
 import { KhatmProgress } from './pages/KhatmProgress'
+import { ScrollToTop } from './components/ScrollToTop'
 
 function App() {
   return (
     <HashRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Layout />}>

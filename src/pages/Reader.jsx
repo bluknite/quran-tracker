@@ -33,6 +33,11 @@ export const Reader = () => {
     const [isSaving, setIsSaving] = useState(false)
     const lastSavedPageRef = useRef(currentPage)
 
+    // Scroll to top whenever the page changes
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [currentPage])
+
     const [isSwipeEnabled, setIsSwipeEnabled] = useState(() => {
         return localStorage.getItem('quran_swipe_enabled') === 'true'
     })
