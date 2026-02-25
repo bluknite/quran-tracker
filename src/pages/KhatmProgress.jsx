@@ -339,12 +339,6 @@ export const KhatmProgress = () => {
                                 )
                             })()}
                         </div>
-                        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                            <span className="text-slate-500 dark:text-slate-400">Current Ayah</span>
-                            <span className="font-medium text-lg text-slate-900 dark:text-white">
-                                {khatm.ayah_number}
-                            </span>
-                        </div>
                     </div>
 
                     <Link
