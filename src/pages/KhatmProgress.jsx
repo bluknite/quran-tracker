@@ -309,7 +309,9 @@ export const KhatmProgress = () => {
                         </div>
                         <div className="flex flex-col bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl gap-3">
                             <div className="flex justify-between items-center bg-transparent p-0 rounded-none">
-                                <span className="text-slate-500 dark:text-slate-400">Surah</span>
+                                <span className="text-slate-500 dark:text-slate-400">
+                                    {quranMeta.data.surahs.references.find(s => s.number === khatm.surah_number)?.englishName || 'Surah'}
+                                </span>
                                 <div className="font-medium text-lg text-slate-900 dark:text-white flex items-baseline gap-0.5">
                                     <span className="text-sm text-slate-400 dark:text-slate-500 font-normal">#</span>
                                     <span>{khatm.surah_number}</span>
