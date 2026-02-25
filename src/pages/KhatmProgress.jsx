@@ -287,7 +287,7 @@ export const KhatmProgress = () => {
 
                                 // Compute math
                                 const totalPagesInJuz = Math.max(1, (juzEndPage - juzStartPage) + 1)
-                                const pagesReadInJuz = Math.max(0, (currentPage - juzStartPage) + 1)
+                                const pagesReadInJuz = Math.max(0, currentPage - juzStartPage)
                                 const percentComplete = Math.min(100, Math.round((pagesReadInJuz / totalPagesInJuz) * 100))
 
                                 return (
@@ -321,12 +321,13 @@ export const KhatmProgress = () => {
 
                                 const totalAyahs = surahRef.numberOfAyahs
                                 const currentAyah = khatm.ayah_number
-                                const percentComplete = Math.min(100, Math.round((currentAyah / totalAyahs) * 100))
+                                const completedAyahs = Math.max(0, currentAyah - 1)
+                                const percentComplete = Math.min(100, Math.round((completedAyahs / totalAyahs) * 100))
 
                                 return (
                                     <div className="w-full mt-1">
                                         <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
-                                            <span>Ayah {currentAyah} / {totalAyahs}</span>
+                                            <span>Ayah {completedAyahs} / {totalAyahs}</span>
                                             <span className="text-emerald-500">{percentComplete}%</span>
                                         </div>
                                         <div className="w-full bg-slate-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">

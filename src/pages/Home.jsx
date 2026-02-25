@@ -144,11 +144,12 @@ export const Home = () => {
 
                 {khatm.status === 'active' && (() => {
                     const currentPage = getPageNumber(khatm.surah_number, khatm.ayah_number)
-                    const progressPercent = Math.min(100, Math.round((currentPage / 604) * 100))
+                    const pagesRead = Math.max(0, currentPage - 1)
+                    const progressPercent = Math.min(100, Math.round((pagesRead / 604) * 100))
                     return (
                         <div className="mb-2 mt-2">
                             <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
-                                <span>Page {currentPage} / 604</span>
+                                <span>Page {pagesRead} / 604</span>
                                 <span className="text-emerald-500">{progressPercent}%</span>
                             </div>
                             <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
