@@ -157,9 +157,21 @@ export const Reader = () => {
 
             {/* Top Display Header Portaled to Navbar */}
             {document.getElementById('navbar-center-portal') && createPortal(
-                <div className="text-center pointer-events-auto mt-1">
-                    <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight">Page {currentPage}</div>
-                    <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
+                <div className="text-center pointer-events-auto mt-1 flex flex-col items-center">
+                    <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1">
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">Page</span>
+                        <select
+                            value={currentPage}
+                            onChange={(e) => setCurrentPage(parseInt(e.target.value))}
+                            className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none hover:bg-slate-100 dark:hover:bg-slate-800 rounded px-1 transition-colors"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0rem center', backgroundSize: '1.2em 1.2em', backgroundRepeat: 'no-repeat' }}
+                        >
+                            {Array.from({ length: 604 }, (_, i) => i + 1).map(p => (
+                                <option key={p} value={p} className="text-slate-800">{p}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 -mt-0.5">
                         Surah {currentMapping?.start.surah}:{currentMapping?.start.ayah} - {currentMapping?.end.surah}:{currentMapping?.end.ayah}
                     </div>
                 </div>,
