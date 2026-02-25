@@ -235,7 +235,7 @@ export const KhatmProgress = () => {
                             <div className="flex justify-between items-center bg-transparent p-0 rounded-none">
                                 <span className="text-slate-500 dark:text-slate-400">Current Juz</span>
                                 <span className="font-medium text-lg text-slate-900 dark:text-white">
-                                    {currentJuz}
+                                    #{currentJuz}
                                 </span>
                             </div>
 
@@ -310,7 +310,7 @@ export const KhatmProgress = () => {
                             <div className="flex justify-between items-center bg-transparent p-0 rounded-none">
                                 <span className="text-slate-500 dark:text-slate-400">Current Surah</span>
                                 <span className="font-medium text-lg text-slate-900 dark:text-white">
-                                    {khatm.surah_number}
+                                    #{khatm.surah_number}
                                 </span>
                             </div>
 
