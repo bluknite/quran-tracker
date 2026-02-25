@@ -306,11 +306,38 @@ export const KhatmProgress = () => {
                                 )
                             })()}
                         </div>
-                        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                            <span className="text-slate-500 dark:text-slate-400">Current Surah</span>
-                            <span className="font-medium text-lg text-slate-900 dark:text-white">
-                                {khatm.surah_number}
-                            </span>
+                        <div className="flex flex-col bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl gap-3">
+                            <div className="flex justify-between items-center bg-transparent p-0 rounded-none">
+                                <span className="text-slate-500 dark:text-slate-400">Current Surah</span>
+                                <span className="font-medium text-lg text-slate-900 dark:text-white">
+                                    {khatm.surah_number}
+                                </span>
+                            </div>
+
+                            {/* Inner Surah Progress Bar */}
+                            {(() => {
+                                const surahRef = quranMeta.data.surahs.references.find(s => s.number === khatm.surah_number)
+                                if (!surahRef) return null
+
+                                const totalAyahs = surahRef.numberOfAyahs
+                                const currentAyah = khatm.ayah_number
+                                const percentComplete = Math.min(100, Math.round((currentAyah / totalAyahs) * 100))
+
+                                return (
+                                    <div className="w-full mt-1">
+                                        <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
+                                            <span>Ayah {currentAyah} / {totalAyahs}</span>
+                                            <span className="text-emerald-500">{percentComplete}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                                            <div
+                                                className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                                style={{ width: `${percentComplete}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )
+                            })()}
                         </div>
                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
                             <span className="text-slate-500 dark:text-slate-400">Current Ayah</span>
