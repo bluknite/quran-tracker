@@ -97,7 +97,7 @@ export const Home = () => {
                         Welcome to <span className="text-emerald-500">Quran Tracker</span>
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400">
-                        Sign in to track your reading progress across multiple devices.
+                        Sign in to start tracking your Quran recitation.
                     </p>
                 </div>
             </div>
@@ -186,11 +186,8 @@ export const Home = () => {
         <div className="flex flex-col items-center h-full max-w-4xl mx-auto space-y-12 pb-16 px-4 sm:px-0">
             {/* Header Area */}
             <div className="text-center space-y-4 pt-8 w-full max-w-2xl">
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                    <span className="text-emerald-500">Khatm</span> Tracker
-                </h1>
                 <p className="text-lg text-slate-600 dark:text-slate-400">
-                    Select a reading plan below or create a new one to begin your journey.
+                    Select a khatm below to continue reading or create a new one to begin your journey.
                 </p>
             </div>
 
