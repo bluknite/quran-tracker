@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { fetchKhatms, createKhatm } from '../lib/db'
 import quranMeta from '../data/quran-meta.json'
+import pageMapping from '../data/page-verse-mapping.json'
 
 // Helper to get Surah name dynamically, looping every 114
 const getKhatmName = (khatmNumber) => {
@@ -29,6 +30,19 @@ const getJuzNumber = (surah_number, ayah_number) => {
         }
     }
     return juz
+}
+
+// Helper to get page number based on surah and ayah
+const getPageNumber = (surah, ayah) => {
+    for (const [pageNumStr, data] of Object.entries(pageMapping)) {
+        if (
+            (surah > data.start.surah || (surah === data.start.surah && ayah >= data.start.ayah)) &&
+            (surah < data.end.surah || (surah === data.end.surah && ayah <= data.end.ayah))
+        ) {
+            return parseInt(pageNumStr)
+        }
+    }
+    return 1
 }
 
 export const Home = () => {
@@ -115,11 +129,30 @@ export const Home = () => {
                 </div>
 
                 {khatm.user_label && (
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 truncate">
                         ({khatm.user_label})
                     </p>
                 )}
                 {!khatm.user_label && <div className="mb-4"></div>}
+
+                {khatm.status === 'active' && (() => {
+                    const currentPage = getPageNumber(khatm.surah_number, khatm.ayah_number)
+                    const progressPercent = Math.min(100, Math.round((currentPage / 604) * 100))
+                    return (
+                        <div className="mb-2 mt-2">
+                            <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
+                                <span>Page {currentPage} / 604</span>
+                                <span className="text-emerald-500">{progressPercent}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                <div
+                                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                    style={{ width: `${progressPercent}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    )
+                })()}
 
                 <div className="flex justify-between items-end mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/50">
                     {khatm.status === 'active' ? (
