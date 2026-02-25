@@ -92,7 +92,7 @@ export const Home = () => {
     if (!user) {
         return (
             <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center space-y-8">
-                <div className="space-y-4">
+                <div className="space-y-4 mb-4">
                     <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                         Welcome to <span className="text-emerald-500">Quran Tracker</span>
                     </h1>
@@ -100,6 +100,13 @@ export const Home = () => {
                         Sign in to start tracking your Quran recitation.
                     </p>
                 </div>
+                <Link
+                    to="/read"
+                    className="px-8 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium rounded-full shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group"
+                >
+                    <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    Just Read Anonymously
+                </Link>
             </div>
         )
     }
@@ -206,18 +213,28 @@ export const Home = () => {
                 </div>
             )}
 
-            {/* Create New Khatm Section */}
-            <div className="w-full flex justify-center">
+            {/* Create New Khatm & Anonymous Read Section */}
+            <div className="w-full flex flex-col items-center gap-4">
                 {!showCreateForm ? (
-                    <button
-                        onClick={() => setShowCreateForm(true)}
-                        className="px-8 py-3.5 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 font-medium rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                        Start New Khatm
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-2">
+                        <button
+                            onClick={() => setShowCreateForm(true)}
+                            className="px-8 py-3.5 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 font-medium rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                            Start New Khatm
+                        </button>
+
+                        <Link
+                            to="/read"
+                            className="px-8 py-3.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium rounded-2xl transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+                        >
+                            <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                            Just Read
+                        </Link>
+                    </div>
                 ) : (
-                    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-6 md:p-8 relative overflow-hidden animate-fade-in">
+                    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-6 md:p-8 relative overflow-hidden animate-fade-in mt-2">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Start a New Khatm</h2>

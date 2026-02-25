@@ -223,52 +223,58 @@ export const Reader = () => {
                     ← Next
                 </button>
 
-                {currentPage === 604 ? (
-                    <button
-                        onClick={handleFinishKhatm}
-                        disabled={isSaving || !user}
-                        className={`flex-1 px-4 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2 ${!user
-                            ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
-                            : isSaving
-                                ? 'bg-amber-100/90 text-amber-600 dark:bg-amber-900/50'
-                                : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/20'
-                            }`}
-                        title={!user ? "Sign in to save progress" : "Complete your Khatm"}
-                    >
-                        {isSaving ? 'Logging...' : '✨ Finish Khatm ✨'}
-                    </button>
-                ) : (
-                    <button
-                        onClick={saveProgress}
-                        disabled={isSaving || !user || currentPage <= lastSavedPageRef.current}
-                        className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
-                            ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
-                            : (currentPage <= lastSavedPageRef.current)
-                                ? 'bg-slate-100/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-500 cursor-default'
+                {khatmId ? (
+                    currentPage === 604 ? (
+                        <button
+                            onClick={handleFinishKhatm}
+                            disabled={isSaving || !user}
+                            className={`flex-1 px-4 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2 ${!user
+                                ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
                                 : isSaving
-                                    ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
-                                    : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
-                            }`}
-                        title={
-                            !user
-                                ? "Sign in to save progress"
-                                : currentPage < lastSavedPageRef.current
-                                    ? "Already read in current Khatm cycle"
-                                    : currentPage === lastSavedPageRef.current
-                                        ? "Advance to next page to save progress"
-                                        : "Save current page"
-                        }
-                    >
-                        {
-                            isSaving
-                                ? 'Saved!'
-                                : currentPage < lastSavedPageRef.current
-                                    ? 'Previously Read'
-                                    : currentPage === lastSavedPageRef.current
-                                        ? 'Flip page to save'
-                                        : 'Save Progress'
-                        }
-                    </button>
+                                    ? 'bg-amber-100/90 text-amber-600 dark:bg-amber-900/50'
+                                    : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/20'
+                                }`}
+                            title={!user ? "Sign in to save progress" : "Complete your Khatm"}
+                        >
+                            {isSaving ? 'Logging...' : '✨ Finish Khatm ✨'}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={saveProgress}
+                            disabled={isSaving || !user || currentPage <= lastSavedPageRef.current}
+                            className={`flex-1 px-4 py-3 rounded-lg font-medium transition ${!user
+                                ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
+                                : (currentPage <= lastSavedPageRef.current)
+                                    ? 'bg-slate-100/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-500 cursor-default'
+                                    : isSaving
+                                        ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
+                                        : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
+                                }`}
+                            title={
+                                !user
+                                    ? "Sign in to save progress"
+                                    : currentPage < lastSavedPageRef.current
+                                        ? "Already read in current Khatm cycle"
+                                        : currentPage === lastSavedPageRef.current
+                                            ? "Advance to next page to save progress"
+                                            : "Save current page"
+                            }
+                        >
+                            {
+                                isSaving
+                                    ? 'Saved!'
+                                    : currentPage < lastSavedPageRef.current
+                                        ? 'Previously Read'
+                                        : currentPage === lastSavedPageRef.current
+                                            ? 'Flip page to save'
+                                            : 'Save Progress'
+                            }
+                        </button>
+                    )
+                ) : (
+                    <div className="flex-1 flex justify-center text-sm font-medium text-slate-400 dark:text-slate-500 tracking-wide uppercase">
+                        Just Reciting
+                    </div>
                 )}
 
                 <button
