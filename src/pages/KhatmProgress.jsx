@@ -231,11 +231,80 @@ export const KhatmProgress = () => {
                     </h2>
 
                     <div className="flex flex-col gap-4 mb-8">
-                        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                            <span className="text-slate-500 dark:text-slate-400">Current Juz</span>
-                            <span className="font-medium text-lg text-slate-900 dark:text-white">
-                                {currentJuz}
-                            </span>
+                        <div className="flex flex-col bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl gap-3">
+                            <div className="flex justify-between items-center bg-transparent p-0 rounded-none">
+                                <span className="text-slate-500 dark:text-slate-400">Current Juz</span>
+                                <span className="font-medium text-lg text-slate-900 dark:text-white">
+                                    {currentJuz}
+                                </span>
+                            </div>
+
+                            {/* Inner Juz Progress Bar */}
+                            {currentJuz && (() => {
+                                // Extract current page based on bookmark
+                                let currentPage = 1
+                                for (const [pageNumStr, data] of Object.entries(pageMapping)) {
+                                    if (
+                                        (khatm.surah_number > data.start.surah || (khatm.surah_number === data.start.surah && khatm.ayah_number >= data.start.ayah)) &&
+                                        (khatm.surah_number < data.end.surah || (khatm.surah_number === data.end.surah && khatm.ayah_number <= data.end.ayah))
+                                    ) {
+                                        currentPage = parseInt(pageNumStr)
+                                        break
+                                    }
+                                }
+
+                                // Find Juz boundaries
+                                const juzRefs = quranMeta.data.juzs.references
+                                const activeRef = juzRefs[currentJuz - 1] // currentJuz is 1-indexed
+                                const nextRef = currentJuz < 30 ? juzRefs[currentJuz] : null
+
+                                // Find Juz Start Page
+                                let juzStartPage = 1
+                                for (const [pageNumStr, data] of Object.entries(pageMapping)) {
+                                    if (
+                                        (activeRef.surah > data.start.surah || (activeRef.surah === data.start.surah && activeRef.ayah >= data.start.ayah)) &&
+                                        (activeRef.surah < data.end.surah || (activeRef.surah === data.end.surah && activeRef.ayah <= data.end.ayah))
+                                    ) {
+                                        juzStartPage = parseInt(pageNumStr)
+                                        break
+                                    }
+                                }
+
+                                // Find Juz End Page
+                                let juzEndPage = 604
+                                if (nextRef) {
+                                    // The Juz end page is exactly one page *before* the start page of the NEXT Juz
+                                    for (const [pageNumStr, data] of Object.entries(pageMapping)) {
+                                        if (
+                                            (nextRef.surah > data.start.surah || (nextRef.surah === data.start.surah && nextRef.ayah >= data.start.ayah)) &&
+                                            (nextRef.surah < data.end.surah || (nextRef.surah === data.end.surah && nextRef.ayah <= data.end.ayah))
+                                        ) {
+                                            juzEndPage = parseInt(pageNumStr) - 1
+                                            break
+                                        }
+                                    }
+                                }
+
+                                // Compute math
+                                const totalPagesInJuz = Math.max(1, (juzEndPage - juzStartPage) + 1)
+                                const pagesReadInJuz = Math.max(0, (currentPage - juzStartPage) + 1)
+                                const percentComplete = Math.min(100, Math.round((pagesReadInJuz / totalPagesInJuz) * 100))
+
+                                return (
+                                    <div className="w-full mt-1">
+                                        <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
+                                            <span>Page {pagesReadInJuz} / {totalPagesInJuz}</span>
+                                            <span className="text-amber-500">{percentComplete}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-200 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                                            <div
+                                                className="bg-amber-500 h-1.5 rounded-full transition-all duration-500"
+                                                style={{ width: `${percentComplete}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )
+                            })()}
                         </div>
                         <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
                             <span className="text-slate-500 dark:text-slate-400">Current Surah</span>
