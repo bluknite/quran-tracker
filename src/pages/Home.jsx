@@ -14,6 +14,19 @@ const getKhatmName = (khatmNumber) => {
     return surah ? surah.englishName : `Khatm ${khatmNumber}`
 }
 
+// Helper to get total cumulative Ayahs completed overall
+const getCompletedAyahsCount = (surah_number, ayah_number) => {
+    const refs = quranMeta.data.surahs.references
+    let total = 0
+    // Sum all ayahs from fully completed previous Surahs
+    for (let i = 0; i < surah_number - 1; i++) {
+        total += refs[i].numberOfAyahs
+    }
+    // Add completed ayahs from the current active Surah
+    total += Math.max(0, ayah_number - 1)
+    return total
+}
+
 // Helper to determine Juz from current Surah and Ayah
 const getJuzNumber = (surah_number, ayah_number) => {
     const juzRefs = quranMeta.data.juzs.references
@@ -145,18 +158,36 @@ export const Home = () => {
                 {khatm.status === 'active' && (() => {
                     const currentPage = getPageNumber(khatm.surah_number, khatm.ayah_number)
                     const pagesRead = Math.max(0, currentPage - 1)
-                    const progressPercent = Math.min(100, Math.round((pagesRead / 604) * 100))
+                    const pageProgressPercent = Math.min(100, Math.round((pagesRead / 604) * 100))
+
+                    const ayahsRead = getCompletedAyahsCount(khatm.surah_number, khatm.ayah_number)
+                    const ayahProgressPercent = Math.min(100, Math.round((ayahsRead / 6236) * 100))
+
                     return (
-                        <div className="mb-2 mt-2">
-                            <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
-                                <span>Page {pagesRead} / 604</span>
-                                <span className="text-emerald-500">{progressPercent}%</span>
+                        <div className="mb-2 mt-2 space-y-3">
+                            <div>
+                                <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
+                                    <span>Page {pagesRead} / 604</span>
+                                    <span className="text-emerald-500">{pageProgressPercent}%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div
+                                        className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                        style={{ width: `${pageProgressPercent}%` }}
+                                    ></div>
+                                </div>
                             </div>
-                            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                <div
-                                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-                                    style={{ width: `${progressPercent}%` }}
-                                ></div>
+                            <div>
+                                <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
+                                    <span>Ayah {ayahsRead} / 6236</span>
+                                    <span className="text-amber-500">{ayahProgressPercent}%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div
+                                        className="bg-amber-500 h-1.5 rounded-full transition-all duration-500"
+                                        style={{ width: `${ayahProgressPercent}%` }}
+                                    ></div>
+                                </div>
                             </div>
                         </div>
                     )
