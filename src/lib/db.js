@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import pageMapping from '../data/page-verse-mapping.json'
 
 /**
  * Fetches all Khatms for a given user.
@@ -161,6 +162,86 @@ export const logPageRead = async (userId, khatmId, pageNumber) => {
     if (error) {
         console.error('Error logging page read:', error.message)
     }
+}
+
+/**
+ * Removes the numerically highest page logged for a specific Khatm
+ * and safely decrements the active bookmark to the start of the next page.
+ * Reverts completion status if the user undoes page 604.
+ * @param {string} khatmId - The unique identifier of the Khatm
+ * @returns {Promise<boolean>} Success status
+ */
+export const undoHighestReadPage = async (khatmId) => {
+    if (!khatmId) return false
+
+    // 1. Find the highest page number logged
+    const { data: highestRead, error: fetchErr } = await supabase
+        .from('reading_history')
+        .select('id, page_number')
+        .eq('khatm_id', khatmId)
+        .order('page_number', { ascending: false })
+        .limit(1)
+
+    if (fetchErr) {
+        console.error('Error fetching highest page to undo:', fetchErr.message)
+        return false
+    }
+
+    if (!highestRead || highestRead.length === 0) {
+        return false // Nothing to undo
+    }
+
+    const rowIdToDelete = highestRead[0].id
+
+    // 2. Delete it exactly by its unique row ID
+    const { error: deleteErr } = await supabase
+        .from('reading_history')
+        .delete()
+        .eq('id', rowIdToDelete)
+
+    if (deleteErr) {
+        console.error('Error deleting highest page:', deleteErr.message)
+        return false
+    }
+
+    // 3. Find the NEW highest page number (if any) remaining
+    const { data: newHighestRead, error: fetchNewErr } = await supabase
+        .from('reading_history')
+        .select('page_number')
+        .eq('khatm_id', khatmId)
+        .order('page_number', { ascending: false })
+        .limit(1)
+
+    if (fetchNewErr) {
+        console.error('Error fetching new highest page after undo:', fetchNewErr.message)
+        return false
+    }
+
+    let nextBookmarkPage = 1 // Default to start of Quran if history is entirely empty now
+    if (newHighestRead && newHighestRead.length > 0) {
+        nextBookmarkPage = Math.min(604, newHighestRead[0].page_number + 1)
+    }
+
+    // 4. Determine Surah/Ayah for the new bookmark
+    const nextStart = pageMapping[String(nextBookmarkPage)].start
+
+    // 5. Update the Khatm row backward and ensure it safely returns to active status
+    const { error: updateErr } = await supabase
+        .from('khatms')
+        .update({
+            surah_number: nextStart.surah,
+            ayah_number: nextStart.ayah,
+            status: 'active',
+            completed_at: null
+        })
+        .eq('id', khatmId)
+
+    if (updateErr) {
+        console.error('Error restoring khatm bookmark after undo:', updateErr.message)
+        return false
+    }
+
+    return true
 }
 
 /**

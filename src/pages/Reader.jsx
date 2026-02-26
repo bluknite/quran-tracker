@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { updateKhatmProgress, logPageRangeRead, finishKhatm } from '../lib/db'
+import { updateKhatmProgress, logPageRangeRead, finishKhatm, fetchReadingHistory, undoHighestReadPage } from '../lib/db'
 import pageMapping from '../data/page-verse-mapping.json'
 
 export const Reader = () => {
@@ -31,7 +31,25 @@ export const Reader = () => {
 
     const [currentPage, setCurrentPage] = useState(() => findPageBySurahAyah(initialSurah, initialAyah))
     const [isSaving, setIsSaving] = useState(false)
+    const [isUndoing, setIsUndoing] = useState(false)
+    const [highestPageRead, setHighestPageRead] = useState(null)
     const lastSavedPageRef = useRef(currentPage)
+
+    // Load highest page read to conditionally determine if we are at the edge
+    useEffect(() => {
+        if (!khatmId || !user) return
+
+        let isMounted = true
+        fetchReadingHistory(khatmId).then(history => {
+            if (!isMounted) return
+            if (history && history.length > 0) {
+                setHighestPageRead(Math.max(...history.map(h => h.page_number)))
+            } else {
+                setHighestPageRead(null)
+            }
+        })
+        return () => { isMounted = false }
+    }, [khatmId, user])
 
     // Scroll to top whenever the page changes
     useEffect(() => {
@@ -116,6 +134,7 @@ export const Reader = () => {
         if (currentPage > lastSavedPageRef.current) {
             const endPage = currentPage - 1
             await logPageRangeRead(user.id, khatmId, lastSavedPageRef.current, endPage)
+            setHighestPageRead(prev => Math.max(prev || 0, endPage))
         }
 
         // Update the reference point for the next bulk save.
@@ -145,6 +164,28 @@ export const Reader = () => {
 
         // Send the user to the Dashboard to see their updated histogram
         navigate(`/khatm/${khatmId}`)
+    }
+
+    const handleUndo = async () => {
+        if (!user || !khatmId || isUndoing || isSaving) return
+
+        setIsUndoing(true)
+        const success = await undoHighestReadPage(khatmId)
+
+        if (success) {
+            // Re-fetch highest page to update state and hide button
+            const history = await fetchReadingHistory(khatmId)
+            let newHighest = null
+            if (history && history.length > 0) {
+                newHighest = Math.max(...history.map(h => h.page_number))
+            }
+            setHighestPageRead(newHighest)
+
+            // Adjust the save ref tracker so we don't accidentally re-log the deleted block
+            lastSavedPageRef.current = newHighest ? newHighest + 1 : 1
+        }
+
+        setIsUndoing(false)
     }
 
     // Format image URL (e.g. page_001.jpg, page_042.jpg, page_604.jpg)
@@ -224,7 +265,21 @@ export const Reader = () => {
                 </button>
 
                 {khatmId ? (
-                    currentPage === 604 ? (
+                    currentPage === highestPageRead ? (
+                        <button
+                            onClick={handleUndo}
+                            disabled={isUndoing || !user}
+                            className={`flex-1 px-4 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2 ${!user
+                                ? 'bg-slate-200/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-600 cursor-not-allowed'
+                                : isUndoing
+                                    ? 'bg-red-100/90 text-red-500 dark:bg-red-900/50'
+                                    : 'bg-white/80 dark:bg-slate-800/80 text-red-500 hover:bg-slate-50 dark:hover:bg-slate-700 border border-red-200 dark:border-red-500/30'
+                                }`}
+                            title="Undo this read page"
+                        >
+                            {isUndoing ? 'Undoing...' : '↺ Undo Read Page'}
+                        </button>
+                    ) : currentPage === 604 ? (
                         <button
                             onClick={handleFinishKhatm}
                             disabled={isSaving || !user}
@@ -248,17 +303,9 @@ export const Reader = () => {
                                     ? 'bg-slate-100/90 text-slate-400 dark:bg-slate-800/90 dark:text-slate-500 cursor-default'
                                     : isSaving
                                         ? 'bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/50'
-                                        : 'bg-emerald-500/90 text-white hover:bg-emerald-600 shadow-sm'
+                                        : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm shadow-emerald-500/20'
                                 }`}
-                            title={
-                                !user
-                                    ? "Sign in to save progress"
-                                    : currentPage < lastSavedPageRef.current
-                                        ? "Already read in current Khatm cycle"
-                                        : currentPage === lastSavedPageRef.current
-                                            ? "Advance to next page to save progress"
-                                            : "Save current page"
-                            }
+                            title={!user ? "Sign in to save progress" : (currentPage <= lastSavedPageRef.current ? "Progress is already saved for this page and prior pages. Read on!" : "Save all progress leading up to (not including) this page")}
                         >
                             {
                                 isSaving
