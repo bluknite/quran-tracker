@@ -274,13 +274,15 @@ export const KhatmProgress = () => {
                                 // Find Juz End Page
                                 let juzEndPage = 604
                                 if (nextRef) {
-                                    // The Juz end page is exactly one page *before* the start page of the NEXT Juz
+                                    // The Juz end page is exactly one page *before* the start page of the NEXT Juz,
+                                    // UNLESS the next Juz starts in the middle of a page, in which case the current Juz ends on that same page.
                                     for (const [pageNumStr, data] of Object.entries(pageMapping)) {
                                         if (
                                             (nextRef.surah > data.start.surah || (nextRef.surah === data.start.surah && nextRef.ayah >= data.start.ayah)) &&
                                             (nextRef.surah < data.end.surah || (nextRef.surah === data.end.surah && nextRef.ayah <= data.end.ayah))
                                         ) {
-                                            juzEndPage = parseInt(pageNumStr) - 1
+                                            const isExactPageStart = (nextRef.surah === data.start.surah && nextRef.ayah === data.start.ayah)
+                                            juzEndPage = isExactPageStart ? parseInt(pageNumStr) - 1 : parseInt(pageNumStr)
                                             break
                                         }
                                     }
