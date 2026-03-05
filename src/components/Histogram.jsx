@@ -171,13 +171,20 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
             completionDate.setDate(today.getDate() + daysRemaining)
         }
 
-        // 4. Compute Experimental Pace (Active Days Only)
-        // Extract unique days where reading actually occurred
-        const uniqueActiveDays = new Set(history.map(entry => {
+        // 4. Compute Experimental Paces
+        // Map history to local days and count pages read per day
+        const dayCounts = {}
+        history.forEach(entry => {
             const date = new Date(entry.read_at)
-            return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-        })).size
+            const dateStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+            // Assuming each entry in history is a unique page read on that day
+            dayCounts[dateStr] = (dayCounts[dateStr] || 0) + 1
+        })
 
+        const activeDaysArray = Object.values(dayCounts).sort((a, b) => a - b)
+        const uniqueActiveDays = activeDaysArray.length
+
+        // --- Average Active Pace ---
         const experimentalPace = uniqueActiveDays > 0 ? pagesRead / uniqueActiveDays : 0
         let experimentalDaysRemaining = experimentalPace > 0 ? Math.ceil(pagesRemaining / experimentalPace) : 0
         let experimentalCompletionDate = null
@@ -186,14 +193,58 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
             experimentalCompletionDate.setDate(today.getDate() + experimentalDaysRemaining)
         }
 
+        // --- Median Active Pace ---
+        let medianActivePace = 0
+        if (uniqueActiveDays > 0) {
+            const mid = Math.floor(uniqueActiveDays / 2)
+            medianActivePace = uniqueActiveDays % 2 !== 0 ? activeDaysArray[mid] : (activeDaysArray[mid - 1] + activeDaysArray[mid]) / 2
+        }
+
+        let medianActiveDaysRemaining = medianActivePace > 0 ? Math.ceil(pagesRemaining / medianActivePace) : 0
+        let medianActiveCompletionDate = null
+        if (medianActivePace > 0) {
+            medianActiveCompletionDate = new Date()
+            medianActiveCompletionDate.setDate(today.getDate() + medianActiveDaysRemaining)
+        }
+
+        // --- Median All Pace ---
+        const allDaysArray = [...activeDaysArray]
+        const zeroDaysCount = Math.max(0, daysElapsed - uniqueActiveDays)
+        for (let i = 0; i < zeroDaysCount; i++) {
+            allDaysArray.push(0)
+        }
+        allDaysArray.sort((a, b) => a - b)
+
+        let medianAllPace = 0
+        if (allDaysArray.length > 0) {
+            const mid = Math.floor(allDaysArray.length / 2)
+            medianAllPace = allDaysArray.length % 2 !== 0 ? allDaysArray[mid] : (allDaysArray[mid - 1] + allDaysArray[mid]) / 2
+        }
+
+        let medianAllDaysRemaining = medianAllPace > 0 ? Math.ceil(pagesRemaining / medianAllPace) : 0
+        let medianAllCompletionDate = null
+        if (medianAllPace > 0) {
+            medianAllCompletionDate = new Date()
+            medianAllCompletionDate.setDate(today.getDate() + medianAllDaysRemaining)
+        }
+
         return {
             status: 'active',
             daysRemaining,
             completionDate: completionDate ? completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
             pace: pace.toFixed(1),
+            // Average Active
             experimentalPace: experimentalPace.toFixed(1),
             experimentalDaysRemaining,
             experimentalCompletionDate: experimentalCompletionDate ? experimentalCompletionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+            // Median Active
+            medianActivePace: medianActivePace.toFixed(1),
+            medianActiveDaysRemaining,
+            medianActiveCompletionDate: medianActiveCompletionDate ? medianActiveCompletionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+            // Median All
+            medianAllPace: medianAllPace.toFixed(1),
+            medianAllDaysRemaining,
+            medianAllCompletionDate: medianAllCompletionDate ? medianAllCompletionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
         }
     }, [history, khatm])
 
@@ -256,12 +307,40 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                                     <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
                                         EXP
                                     </span>
-                                    <h4 className="text-sm font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
-                                        Active Pace: {forecast.experimentalCompletionDate}
+                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                        Avg. Active Pace: {forecast.experimentalCompletionDate}
                                     </h4>
                                 </div>
-                                <p className="text-xs text-rose-500/80 dark:text-rose-400/80">
+                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
                                     {forecast.experimentalDaysRemaining} days remaining at {forecast.experimentalPace} pages/day
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                        EXP
+                                    </span>
+                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                        Median Active Pace: {forecast.medianActiveCompletionDate}
+                                    </h4>
+                                </div>
+                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
+                                    {forecast.medianActiveDaysRemaining} days remaining at {forecast.medianActivePace} pages/day
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                        EXP
+                                    </span>
+                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                        Median Pace (All Days): {forecast.medianAllCompletionDate}
+                                    </h4>
+                                </div>
+                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
+                                    {forecast.medianAllDaysRemaining} days remaining at {forecast.medianAllPace} pages/day
                                 </p>
                             </div>
                         </div>
