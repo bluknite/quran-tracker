@@ -228,11 +228,46 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
             medianAllCompletionDate.setDate(today.getDate() + medianAllDaysRemaining)
         }
 
+        // --- Main Bound Calculation (Active Med/Avg) ---
+        const activePaces = [experimentalPace, medianActivePace].filter(p => p > 0);
+        let minActiveDaysRemaining = 0;
+        let maxActiveDaysRemaining = 0;
+        let minActiveCompletionDate = null;
+        let maxActiveCompletionDate = null;
+        let minActivePace = 0;
+        let maxActivePace = 0;
+
+        if (activePaces.length > 0) {
+            minActivePace = Math.min(...activePaces);
+            maxActivePace = Math.max(...activePaces);
+
+            // max pace = min days
+            minActiveDaysRemaining = Math.max(1, Math.ceil(pagesRemaining / maxActivePace));
+            // min pace = max days
+            maxActiveDaysRemaining = Math.max(1, Math.ceil(pagesRemaining / minActivePace));
+
+            if (maxActivePace > 0) {
+                minActiveCompletionDate = new Date();
+                minActiveCompletionDate.setDate(today.getDate() + minActiveDaysRemaining);
+            }
+            if (minActivePace > 0) {
+                maxActiveCompletionDate = new Date();
+                maxActiveCompletionDate.setDate(today.getDate() + maxActiveDaysRemaining);
+            }
+        }
+
         return {
             status: 'active',
             daysRemaining,
             completionDate: completionDate ? completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
             pace: pace.toFixed(1),
+            // Bound Forecast Updates
+            minActiveDaysRemaining,
+            maxActiveDaysRemaining,
+            minActivePace: minActivePace.toFixed(1),
+            maxActivePace: maxActivePace.toFixed(1),
+            minActiveCompletionDate: minActiveCompletionDate ? minActiveCompletionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+            maxActiveCompletionDate: maxActiveCompletionDate ? maxActiveCompletionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
             // Average Active
             experimentalPace: experimentalPace.toFixed(1),
             experimentalDaysRemaining,
@@ -295,10 +330,18 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                         <div className="flex flex-col gap-3">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
-                                    Est. Completion: {forecast.completionDate}
+                                    Est. Completion: {forecast.minActiveCompletionDate === forecast.maxActiveCompletionDate
+                                        ? forecast.minActiveCompletionDate
+                                        : `${forecast.minActiveCompletionDate} - ${forecast.maxActiveCompletionDate}`}
                                 </h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    {forecast.daysRemaining} days remaining at {forecast.pace} pages/day
+                                    {forecast.minActiveDaysRemaining === forecast.maxActiveDaysRemaining
+                                        ? forecast.minActiveDaysRemaining
+                                        : `${forecast.minActiveDaysRemaining}-${forecast.maxActiveDaysRemaining}`} days remaining at {
+                                        forecast.minActivePace === forecast.maxActivePace
+                                            ? forecast.minActivePace
+                                            : `${forecast.minActivePace}-${forecast.maxActivePace}`
+                                    } pages/day
                                 </p>
                             </div>
 
