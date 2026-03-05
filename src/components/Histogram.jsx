@@ -348,7 +348,7 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                             <div className="flex flex-col border-l-2 border-rose-500/30 pl-3">
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                     <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        EXP
+                                        DEBUG
                                     </span>
                                     <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
                                         Avg. Active Pace: {forecast.experimentalCompletionDate}
@@ -362,7 +362,7 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                             <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                     <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        EXP
+                                        DEBUG
                                     </span>
                                     <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
                                         Avg. Pace (All Days): {forecast.completionDate}
@@ -376,7 +376,7 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                             <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                     <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        EXP
+                                        DEBUG
                                     </span>
                                     <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
                                         Median Active Pace: {forecast.medianActiveCompletionDate}
@@ -390,7 +390,7 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                             <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                     <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        EXP
+                                        DEBUG
                                     </span>
                                     <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
                                         Median Pace (All Days): {forecast.medianAllCompletionDate}
