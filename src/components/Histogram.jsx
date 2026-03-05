@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useSettings } from '../context/SettingsContext'
 import { fetchReadingHistory } from '../lib/db'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -302,6 +303,8 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
         return count
     }, [history])
 
+    const { showDebug } = useSettings()
+
     if (!user || !khatm) return null
     if (loading) return (
         <div className="w-full flex justify-center py-8">
@@ -345,61 +348,65 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                                 </p>
                             </div>
 
-                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        DEBUG
-                                    </span>
-                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
-                                        Avg. Active Pace: {forecast.experimentalCompletionDate}
-                                    </h4>
-                                </div>
-                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
-                                    {forecast.experimentalDaysRemaining} days remaining at {forecast.experimentalPace} pages/day
-                                </p>
-                            </div>
+                            {showDebug && (
+                                <>
+                                    <div className="flex flex-col border-l-2 border-rose-500/30 pl-3">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                                DEBUG
+                                            </span>
+                                            <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                                Avg. Active Pace: {forecast.experimentalCompletionDate}
+                                            </h4>
+                                        </div>
+                                        <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
+                                            {forecast.experimentalDaysRemaining} days remaining at {forecast.experimentalPace} pages/day
+                                        </p>
+                                    </div>
 
-                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        DEBUG
-                                    </span>
-                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
-                                        Avg. Pace (All Days): {forecast.completionDate}
-                                    </h4>
-                                </div>
-                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
-                                    {forecast.daysRemaining} days remaining at {forecast.pace} pages/day
-                                </p>
-                            </div>
+                                    <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                                DEBUG
+                                            </span>
+                                            <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                                Avg. Pace (All Days): {forecast.completionDate}
+                                            </h4>
+                                        </div>
+                                        <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
+                                            {forecast.daysRemaining} days remaining at {forecast.pace} pages/day
+                                        </p>
+                                    </div>
 
-                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        DEBUG
-                                    </span>
-                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
-                                        Median Active Pace: {forecast.medianActiveCompletionDate}
-                                    </h4>
-                                </div>
-                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
-                                    {forecast.medianActiveDaysRemaining} days remaining at {forecast.medianActivePace} pages/day
-                                </p>
-                            </div>
+                                    <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                                DEBUG
+                                            </span>
+                                            <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                                Median Active Pace: {forecast.medianActiveCompletionDate}
+                                            </h4>
+                                        </div>
+                                        <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
+                                            {forecast.medianActiveDaysRemaining} days remaining at {forecast.medianActivePace} pages/day
+                                        </p>
+                                    </div>
 
-                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
-                                        DEBUG
-                                    </span>
-                                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
-                                        Median Pace (All Days): {forecast.medianAllCompletionDate}
-                                    </h4>
-                                </div>
-                                <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
-                                    {forecast.medianAllDaysRemaining} days remaining at {forecast.medianAllPace} pages/day
-                                </p>
-                            </div>
+                                    <div className="flex flex-col border-l-2 border-rose-500/30 pl-3 mt-2">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                                DEBUG
+                                            </span>
+                                            <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                                Median Pace (All Days): {forecast.medianAllCompletionDate}
+                                            </h4>
+                                        </div>
+                                        <p className="text-[10px] text-rose-500/80 dark:text-rose-400/80">
+                                            {forecast.medianAllDaysRemaining} days remaining at {forecast.medianAllPace} pages/day
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
