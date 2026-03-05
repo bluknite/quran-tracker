@@ -162,20 +162,38 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
 
         if (pagesRemaining <= 0) return { status: 'completed' }
 
-        // 3. Compute Pace & Completion Date
-        const pace = pagesRead / daysElapsed // pages per day
-        if (pace === 0) return null
+        // 3. Compute Standard Pace & Completion Date
+        const pace = daysElapsed > 0 ? pagesRead / daysElapsed : 0 // pages per day
+        let daysRemaining = pace > 0 ? Math.ceil(pagesRemaining / pace) : 0
+        let completionDate = null
+        if (pace > 0) {
+            completionDate = new Date()
+            completionDate.setDate(today.getDate() + daysRemaining)
+        }
 
-        const daysRemaining = Math.ceil(pagesRemaining / pace)
+        // 4. Compute Experimental Pace (Active Days Only)
+        // Extract unique days where reading actually occurred
+        const uniqueActiveDays = new Set(history.map(entry => {
+            const date = new Date(entry.read_at)
+            return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+        })).size
 
-        const completionDate = new Date()
-        completionDate.setDate(today.getDate() + daysRemaining)
+        const experimentalPace = uniqueActiveDays > 0 ? pagesRead / uniqueActiveDays : 0
+        let experimentalDaysRemaining = experimentalPace > 0 ? Math.ceil(pagesRemaining / experimentalPace) : 0
+        let experimentalCompletionDate = null
+        if (experimentalPace > 0) {
+            experimentalCompletionDate = new Date()
+            experimentalCompletionDate.setDate(today.getDate() + experimentalDaysRemaining)
+        }
 
         return {
             status: 'active',
             daysRemaining,
-            completionDate: completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            pace: pace.toFixed(1)
+            completionDate: completionDate ? completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+            pace: pace.toFixed(1),
+            experimentalPace: experimentalPace.toFixed(1),
+            experimentalDaysRemaining,
+            experimentalCompletionDate: experimentalCompletionDate ? experimentalCompletionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
         }
     }, [history, khatm])
 
@@ -223,14 +241,30 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                             Reading Consistency (Last 14 Days)
                         </h3>
                     ) : (
-                        <>
-                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
-                                Est. Completion: {forecast.completionDate}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {forecast.daysRemaining} days remaining at {forecast.pace} pages/day
-                            </p>
-                        </>
+                        <div className="flex flex-col gap-3">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
+                                    Est. Completion: {forecast.completionDate}
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    {forecast.daysRemaining} days remaining at {forecast.pace} pages/day
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col border-l-2 border-rose-500/30 pl-3">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-[9px] font-bold tracking-wider text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                        EXP
+                                    </span>
+                                    <h4 className="text-sm font-bold text-rose-600 dark:text-rose-400 text-left leading-none">
+                                        Active Pace: {forecast.experimentalCompletionDate}
+                                    </h4>
+                                </div>
+                                <p className="text-xs text-rose-500/80 dark:text-rose-400/80">
+                                    {forecast.experimentalDaysRemaining} days remaining at {forecast.experimentalPace} pages/day
+                                </p>
+                            </div>
+                        </div>
                     )}
                 </div>
 
