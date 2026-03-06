@@ -244,6 +244,12 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
 
         // --- Main Bound Calculation (Active Med/Avg) ---
         const activePaces = [experimentalPace, medianActivePace].filter(p => p > 0);
+
+        // If no active pace could be established yet (e.g. 0 pages read), return null so the UI gracefully falls back
+        if (activePaces.length === 0) {
+            return null;
+        }
+
         let minActiveDaysRemaining = 0;
         let maxActiveDaysRemaining = 0;
         let minActiveCompletionDate = null;
