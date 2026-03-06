@@ -209,12 +209,12 @@ export const Reader = () => {
                     {activeSurahMeta && (
                         <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1.5 sm:gap-2">
                             <span className="text-sm sm:text-base tracking-tight">{activeSurahMeta.englishName}</span>
-                            <span className="text-slate-300 dark:text-slate-600 font-light">•</span>
-                            <span className="text-sm sm:text-base font-arabic pt-1">{activeSurahMeta.name}</span>
                             <span className="text-slate-300 dark:text-slate-600 font-light ml-0.5 sm:ml-1">•</span>
-                            <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide pt-0.5">
+                            <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide pt-0.5 mt-0.5">
                                 {activeSurahMeta.numberOfAyahs} Ayahs
                             </span>
+                            <span className="text-slate-300 dark:text-slate-600 font-light ml-0.5 sm:ml-1">•</span>
+                            <span className="text-sm sm:text-base font-arabic pt-1">{activeSurahMeta.name}</span>
                         </div>
                     )}
 
