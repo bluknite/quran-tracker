@@ -58,31 +58,34 @@ To run this project locally, you will need Node.js and npm installed, as well as
 
 ## Database Schema
 
-The user's progress is securely stored in a Supabase PostgreSQL table with Row Level Security (RLS) policies guaranteeing privacy.
+The user's progress is securely stored in a Supabase PostgreSQL mapping utilizing Row Level Security (RLS) policies guaranteeing privacy and isolation.
 
 ```sql
-CREATE TABLE user_progress (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id uuid REFERENCES auth.users NOT NULL UNIQUE,
-  surah_number int,
-  ayah_number int,
-  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now())
+CREATE TABLE khatms (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users NOT NULL,
+  khatm_number int NOT NULL,
+  user_label text,
+  status text DEFAULT 'active' CHECK (status IN ('active', 'completed')),
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  last_read_at timestamp with time zone,
+  completed_at timestamp with time zone,
+  surah_number int DEFAULT 1,
+  ayah_number int DEFAULT 1
 );
 
 CREATE TABLE reading_history (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  khatm_id uuid REFERENCES khatms(id) ON DELETE CASCADE,
   user_id uuid REFERENCES auth.users NOT NULL,
   page_number int NOT NULL,
   read_at timestamp with time zone DEFAULT timezone('utc'::text, now())
 );
 
 -- RLS Policies
-ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own progress" ON user_progress FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own progress" ON user_progress FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own progress" ON user_progress FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+ALTER TABLE khatms ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own khatms" ON khatms FOR ALL USING (auth.uid() = user_id);
 
 ALTER TABLE reading_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own history" ON reading_history FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own history" ON reading_history FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can manage own reading history" ON reading_history FOR ALL USING (auth.uid() = user_id);
 ```
