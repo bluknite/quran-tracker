@@ -172,13 +172,26 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
             completionDate.setDate(today.getDate() + daysRemaining)
         }
 
-        // 4. Compute Experimental Paces
-        // Map history to local days and count pages read per day
-        const dayCounts = {}
+        // 4. Compute Experimental Paces (Filtered for Bulk Logs)
+        // Group history by exact timestamp to detect bulk imports (>40 pages at once)
+        const timestampCounts = {}
         history.forEach(entry => {
+            const timeStr = entry.read_at
+            timestampCounts[timeStr] = (timestampCounts[timeStr] || 0) + 1
+        })
+
+        // Create a filtered subset that ignores those bulk timestamps
+        const filteredHistory = history.filter(entry => timestampCounts[entry.read_at] <= 40)
+
+        // Calculate the "true" pages read from this filtered subset
+        const uniqueFilteredPages = new Set(filteredHistory.map(entry => entry.page_number))
+        const filteredPagesRead = uniqueFilteredPages.size
+
+        // Map filtered history to local days and count active days
+        const dayCounts = {}
+        filteredHistory.forEach(entry => {
             const date = new Date(entry.read_at)
             const dateStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-            // Assuming each entry in history is a unique page read on that day
             dayCounts[dateStr] = (dayCounts[dateStr] || 0) + 1
         })
 
@@ -186,7 +199,7 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
         const uniqueActiveDays = activeDaysArray.length
 
         // --- Average Active Pace ---
-        const experimentalPace = uniqueActiveDays > 0 ? pagesRead / uniqueActiveDays : 0
+        const experimentalPace = uniqueActiveDays > 0 ? filteredPagesRead / uniqueActiveDays : 0
         let experimentalDaysRemaining = experimentalPace > 0 ? Math.ceil(pagesRemaining / experimentalPace) : 0
         let experimentalCompletionDate = null
         if (experimentalPace > 0) {
