@@ -225,6 +225,11 @@ export const Home = () => {
         <div className="flex flex-col items-center h-full max-w-4xl mx-auto space-y-12 pb-16 px-4 sm:px-0">
             {/* Header Area */}
             <div className="text-center space-y-4 pt-8 w-full max-w-2xl">
+                {user && (
+                    <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 mb-2 font-medium text-sm shadow-sm">
+                        You're logged in as <strong className="ml-1 tracking-tight">{user.email}</strong>
+                    </div>
+                )}
                 <p className="text-lg text-slate-600 dark:text-slate-400">
                     Select a khatm below to continue reading or create a new one to begin your journey.
                 </p>

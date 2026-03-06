@@ -47,10 +47,6 @@ export const Navbar = () => {
                     <div className="flex items-center justify-end gap-4 z-10 shrink-0 w-auto">
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
-                                    {user.email}
-                                </span>
-
                                 <div className="relative" ref={settingsRef}>
                                     <button
                                         onClick={() => setIsSettingsOpen(!isSettingsOpen)}
