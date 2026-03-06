@@ -205,7 +205,7 @@ export const Reader = () => {
 
             {/* Left Display Header Portaled to Navbar (Page Selector) */}
             {document.getElementById('navbar-left-portal') && createPortal(
-                <div className="flex items-center">
+                <div className="hidden sm:flex items-center">
                     <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
                         <span className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm">Page</span>
                         <select
@@ -225,7 +225,7 @@ export const Reader = () => {
 
             {/* Center Display Header Portaled to Navbar (Surah Title & Info) */}
             {document.getElementById('navbar-center-portal') && createPortal(
-                <div className="text-center pointer-events-auto flex flex-col items-center justify-center -mt-0.5 mx-8 sm:mx-0">
+                <div className="text-center pointer-events-auto flex flex-col items-center justify-center sm:-mt-0.5 mx-2 sm:mx-0 py-1 sm:py-0 w-full sm:w-auto">
                     {activeSurahMeta && (
                         <>
                             <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1.5 sm:gap-2">
@@ -238,6 +238,23 @@ export const Reader = () => {
                             </div>
                         </>
                     )}
+
+                    {/* Mobile Page Selector (Only visible on small screens) */}
+                    <div className="flex sm:hidden items-center justify-center mt-1">
+                        <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
+                            <span className="text-slate-500 dark:text-slate-400 font-medium text-[10px] leading-none">Page</span>
+                            <select
+                                value={currentPage}
+                                onChange={(e) => setCurrentPage(parseInt(e.target.value))}
+                                className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none text-xs leading-none"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0rem center', backgroundSize: '1em 1em', backgroundRepeat: 'no-repeat' }}
+                            >
+                                {Array.from({ length: 604 }, (_, i) => i + 1).map(p => (
+                                    <option key={p} value={p} className="text-slate-800">{p}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                 </div>,
                 document.getElementById('navbar-center-portal')
             )}

@@ -26,7 +26,7 @@ export const Navbar = () => {
     return (
         <nav className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-slate-700/50 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 relative">
+                <div className="flex justify-between min-h-[4rem] py-1.5 sm:py-0 relative items-center">
                     <div className="flex items-center z-10 shrink-0">
                         <Link to={isReading && khatmId ? `/khatm/${khatmId}` : "/"} className="flex items-center gap-2 text-slate-700 dark:text-slate-200 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">
                             {isReading ? (
