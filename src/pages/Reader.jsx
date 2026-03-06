@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { updateKhatmProgress, logPageRangeRead, finishKhatm, fetchReadingHistory, undoHighestReadPage } from '../lib/db'
 import pageMapping from '../data/page-verse-mapping.json'
+import quranMeta from '../data/quran-meta.json'
 
 export const Reader = () => {
     const [searchParams] = useSearchParams()
@@ -193,18 +194,24 @@ export const Reader = () => {
     const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '')
     const imageUrl = `${basePath}/quran-pages/page_${String(currentPage).padStart(3, '0')}.jpg`
 
+    // Extract active Surah metadata for the header
+    const activeSurahMeta = useMemo(() => {
+        if (!currentMapping) return null
+        return quranMeta.data.surahs.references[currentMapping.start.surah - 1]
+    }, [currentMapping])
+
     return (
         <div className="flex flex-col h-full w-full bg-[#fffcdd] dark:bg-[#fffcdd] overflow-hidden">
 
-            {/* Top Display Header Portaled to Navbar */}
-            {document.getElementById('navbar-center-portal') && createPortal(
-                <div className="text-center pointer-events-auto mt-1 flex flex-col items-center">
-                    <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1">
-                        <span className="text-slate-500 dark:text-slate-400 font-medium">Page</span>
+            {/* Left Display Header Portaled to Navbar (Page Selector) */}
+            {document.getElementById('navbar-left-portal') && createPortal(
+                <div className="flex items-center">
+                    <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
+                        <span className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm">Page</span>
                         <select
                             value={currentPage}
                             onChange={(e) => setCurrentPage(parseInt(e.target.value))}
-                            className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none hover:bg-slate-100 dark:hover:bg-slate-800 rounded px-1 transition-colors"
+                            className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none text-xs sm:text-sm"
                             style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0rem center', backgroundSize: '1.2em 1.2em', backgroundRepeat: 'no-repeat' }}
                         >
                             {Array.from({ length: 604 }, (_, i) => i + 1).map(p => (
@@ -212,9 +219,25 @@ export const Reader = () => {
                             ))}
                         </select>
                     </div>
-                    <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 -mt-0.5">
-                        Surah {currentMapping?.start.surah}:{currentMapping?.start.ayah} - {currentMapping?.end.surah}:{currentMapping?.end.ayah}
-                    </div>
+                </div>,
+                document.getElementById('navbar-left-portal')
+            )}
+
+            {/* Center Display Header Portaled to Navbar (Surah Title & Info) */}
+            {document.getElementById('navbar-center-portal') && createPortal(
+                <div className="text-center pointer-events-auto flex flex-col items-center justify-center -mt-0.5 mx-8 sm:mx-0">
+                    {activeSurahMeta && (
+                        <>
+                            <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1.5 sm:gap-2">
+                                <span className="text-sm sm:text-base tracking-tight">{activeSurahMeta.englishName}</span>
+                                <span className="text-slate-300 dark:text-slate-600 font-light">•</span>
+                                <span className="text-sm sm:text-base font-arabic pt-1">{activeSurahMeta.name}</span>
+                            </div>
+                            <div className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 -mt-1 sm:-mt-0.5 uppercase tracking-wide">
+                                {activeSurahMeta.numberOfAyahs} Ayahs
+                            </div>
+                        </>
+                    )}
                 </div>,
                 document.getElementById('navbar-center-portal')
             )}

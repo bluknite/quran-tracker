@@ -39,12 +39,15 @@ export const Navbar = () => {
                                 </span>
                             )}
                         </Link>
+
+                        {/* Left Portal Target (Used for Page Selector) */}
+                        <div id="navbar-left-portal" className="flex items-center ml-2 z-10 shrink-0"></div>
                     </div>
 
                     {/* Center Portal Target */}
-                    <div id="navbar-center-portal" className="absolute inset-0 pointer-events-none flex items-center justify-center"></div>
+                    <div id="navbar-center-portal" className="flex-1 flex justify-center items-center min-w-0 pointer-events-none"></div>
 
-                    <div className="flex items-center gap-4 z-10 shrink-0">
+                    <div className="flex items-center justify-end gap-4 z-10 shrink-0 w-auto">
                         {user ? (
                             <div className="flex items-center gap-4">
                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
