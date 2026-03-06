@@ -203,51 +203,30 @@ export const Reader = () => {
     return (
         <div className="flex flex-col h-full w-full bg-[#fffcdd] dark:bg-[#fffcdd] overflow-hidden">
 
-            {/* Left Display Header Portaled to Navbar (Page Selector) */}
-            {document.getElementById('navbar-left-portal') && createPortal(
-                <div className="hidden sm:flex items-center">
-                    <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
-                        <span className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm">Page</span>
-                        <select
-                            value={currentPage}
-                            onChange={(e) => setCurrentPage(parseInt(e.target.value))}
-                            className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none text-xs sm:text-sm"
-                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0rem center', backgroundSize: '1.2em 1.2em', backgroundRepeat: 'no-repeat' }}
-                        >
-                            {Array.from({ length: 604 }, (_, i) => i + 1).map(p => (
-                                <option key={p} value={p} className="text-slate-800">{p}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>,
-                document.getElementById('navbar-left-portal')
-            )}
-
             {/* Center Display Header Portaled to Navbar (Surah Title & Info) */}
             {document.getElementById('navbar-center-portal') && createPortal(
-                <div className="text-center pointer-events-auto flex flex-col items-center justify-center sm:-mt-0.5 mx-2 sm:mx-0 py-1 sm:py-0 w-full sm:w-auto">
+                <div className="text-center pointer-events-auto flex flex-col items-center justify-center -mt-0.5 mx-2 py-1 w-full">
                     {activeSurahMeta && (
-                        <>
-                            <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1.5 sm:gap-2">
-                                <span className="text-sm sm:text-base tracking-tight">{activeSurahMeta.englishName}</span>
-                                <span className="text-slate-300 dark:text-slate-600 font-light">•</span>
-                                <span className="text-sm sm:text-base font-arabic pt-1">{activeSurahMeta.name}</span>
-                            </div>
-                            <div className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 -mt-1 sm:-mt-0.5 uppercase tracking-wide">
+                        <div className="font-semibold text-slate-800 dark:text-slate-100 leading-tight flex items-center justify-center gap-1.5 sm:gap-2">
+                            <span className="text-sm sm:text-base tracking-tight">{activeSurahMeta.englishName}</span>
+                            <span className="text-slate-300 dark:text-slate-600 font-light">•</span>
+                            <span className="text-sm sm:text-base font-arabic pt-1">{activeSurahMeta.name}</span>
+                            <span className="text-slate-300 dark:text-slate-600 font-light ml-0.5 sm:ml-1">•</span>
+                            <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide pt-0.5">
                                 {activeSurahMeta.numberOfAyahs} Ayahs
-                            </div>
-                        </>
+                            </span>
+                        </div>
                     )}
 
-                    {/* Mobile Page Selector (Only visible on small screens) */}
-                    <div className="flex sm:hidden items-center justify-center mt-1">
-                        <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
-                            <span className="text-slate-500 dark:text-slate-400 font-medium text-[10px] leading-none">Page</span>
+                    {/* Page Selector */}
+                    <div className="flex items-center justify-center mt-1 sm:mt-1.5">
+                        <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">
+                            <span className="text-slate-500 dark:text-slate-400 font-medium text-[10px] sm:text-xs leading-none">Page</span>
                             <select
                                 value={currentPage}
                                 onChange={(e) => setCurrentPage(parseInt(e.target.value))}
-                                className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none text-xs leading-none"
-                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0rem center', backgroundSize: '1em 1em', backgroundRepeat: 'no-repeat' }}
+                                className="bg-transparent text-emerald-600 dark:text-emerald-400 font-bold border-none p-0 pr-4 m-0 outline-none focus:ring-0 cursor-pointer text-center appearance-none text-xs sm:text-sm leading-none"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0rem center', backgroundSize: '1.2em 1.2em', backgroundRepeat: 'no-repeat' }}
                             >
                                 {Array.from({ length: 604 }, (_, i) => i + 1).map(p => (
                                     <option key={p} value={p} className="text-slate-800">{p}</option>

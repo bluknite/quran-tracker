@@ -39,9 +39,6 @@ export const Navbar = () => {
                                 </span>
                             )}
                         </Link>
-
-                        {/* Left Portal Target (Used for Page Selector) */}
-                        <div id="navbar-left-portal" className="flex items-center ml-2 z-10 shrink-0"></div>
                     </div>
 
                     {/* Center Portal Target */}
