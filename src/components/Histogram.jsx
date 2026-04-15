@@ -278,6 +278,8 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
 
         return {
             status: 'active',
+            daysElapsed,
+            uniqueActiveDays,
             daysRemaining,
             completionDate: completionDate ? completionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
             pace: pace.toFixed(1),
@@ -351,6 +353,9 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                     ) : (
                         <div className="flex flex-col gap-3">
                             <div>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left mb-2">
+                                    Active for {forecast.daysElapsed} Day{forecast.daysElapsed !== 1 ? 's' : ''} ({forecast.uniqueActiveDays} logged)
+                                </h3>
                                 <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
                                     Est. Completion: {forecast.minActiveCompletionDate === forecast.maxActiveCompletionDate
                                         ? forecast.minActiveCompletionDate
