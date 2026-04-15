@@ -214,15 +214,33 @@ export const KhatmProgress = () => {
                 )}
             </div>
 
-            {isCompleted && (
-                <div className="w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 text-center shadow-lg shadow-amber-500/5 dark:shadow-none animate-fade-in flex flex-col items-center gap-2">
-                    <span className="text-4xl mb-2 flex items-center justify-center">🎉</span>
-                    <h2 className="text-xl font-bold text-amber-800 dark:text-amber-400">Khatm Completed!</h2>
-                    <p className="text-sm text-amber-700/80 dark:text-amber-300/80 font-medium">
-                        Finished on {new Date(khatm.completed_at).toLocaleDateString()}
-                    </p>
-                </div>
-            )}
+            {isCompleted && (() => {
+                let startDateStr = khatm.created_at;
+                if (history && history.length > 0) {
+                    const timestamps = history.map(h => new Date(h.read_at).getTime());
+                    startDateStr = new Date(Math.min(...timestamps)).toISOString();
+                }
+                const start = new Date(startDateStr);
+                const end = new Date(khatm.completed_at);
+                
+                // Calculate local days elapsed
+                const startLocal = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                const endLocal = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                const daysElapsed = Math.max(1, Math.floor((endLocal - startLocal) / (1000 * 60 * 60 * 24)) + 1);
+
+                return (
+                    <div className="w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 text-center shadow-lg shadow-amber-500/5 dark:shadow-none animate-fade-in flex flex-col items-center gap-2">
+                        <span className="text-4xl mb-2 flex items-center justify-center">🎉</span>
+                        <h2 className="text-xl font-bold text-amber-800 dark:text-amber-400">Khatm Completed!</h2>
+                        <p className="text-sm text-amber-700/80 dark:text-amber-300/80 font-medium">
+                            Finished on {end.toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-amber-600/70 dark:text-amber-400/70 font-medium mt-0.5">
+                            Completed in {daysElapsed} day{daysElapsed !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                )
+            })()}
 
             {!isCompleted && (
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-8 w-full transition-all text-center">
