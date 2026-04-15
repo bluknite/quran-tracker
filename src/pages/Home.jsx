@@ -212,7 +212,7 @@ export const Home = () => {
                         </>
                     ) : (
                         <div className="w-full text-xs text-slate-400 flex justify-between">
-                            <span>Started: {new Date(khatm.created_at).toLocaleDateString()}</span>
+                            <span>Started: {new Date(khatm.started_at).toLocaleDateString()}</span>
                             <span>Finished: {new Date(khatm.completed_at).toLocaleDateString()}</span>
                         </div>
                     )}

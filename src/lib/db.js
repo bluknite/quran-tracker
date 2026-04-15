@@ -16,9 +16,6 @@ export const fetchKhatms = async (userId) => {
             reading_history (read_at)
         `)
         .eq('user_id', userId)
-        // Order foreign table to get the latest read_at first
-        .order('read_at', { foreignTable: 'reading_history', ascending: false })
-        .limit(1, { foreignTable: 'reading_history' })
 
     if (error) {
         console.error('Error fetching khatms:', error.message)
@@ -27,11 +24,15 @@ export const fetchKhatms = async (userId) => {
 
     if (!data) return []
 
-    // Map through the results to assign a unified last_read_at date
+    // Map through the results to assign unified last_read_at and started_at dates
     const sortedKhatms = data.map(khatm => {
-        let lastReadDate = khatm.created_at // Fallback to creation date if no pages read yet
+        let lastReadDate = khatm.created_at // Fallback
+        let startReadDate = khatm.created_at // Fallback
+
         if (khatm.reading_history && khatm.reading_history.length > 0) {
-            lastReadDate = khatm.reading_history[0].read_at
+            const timestamps = khatm.reading_history.map(entry => new Date(entry.read_at).getTime())
+            lastReadDate = new Date(Math.max(...timestamps)).toISOString()
+            startReadDate = new Date(Math.min(...timestamps)).toISOString()
         }
 
         // Remove the joined array so we don't bloat the frontend state
@@ -39,7 +40,8 @@ export const fetchKhatms = async (userId) => {
 
         return {
             ...khatm,
-            last_read_at: lastReadDate
+            last_read_at: lastReadDate,
+            started_at: startReadDate
         }
     })
 
