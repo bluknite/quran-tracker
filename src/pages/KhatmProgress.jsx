@@ -215,12 +215,7 @@ export const KhatmProgress = () => {
             </div>
 
             {isCompleted && (() => {
-                let startDateStr = khatm.created_at;
-                if (history && history.length > 0) {
-                    const timestamps = history.map(h => new Date(h.read_at).getTime());
-                    startDateStr = new Date(Math.min(...timestamps)).toISOString();
-                }
-                const start = new Date(startDateStr);
+                const start = new Date(khatm.started_at);
                 const end = new Date(khatm.completed_at);
                 
                 // Calculate local days elapsed

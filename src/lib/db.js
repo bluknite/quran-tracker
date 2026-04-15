@@ -96,13 +96,23 @@ export const getKhatm = async (khatmId) => {
 
     const { data, error } = await supabase
         .from('khatms')
-        .select('*')
+        .select('*, reading_history (read_at)')
         .eq('id', khatmId)
         .single()
 
     if (error && error.code !== 'PGRST116') {
         console.error('Error fetching specific khatm:', error.message)
     }
+
+    if (!data) return null
+
+    let startReadDate = data.created_at
+    if (data.reading_history && data.reading_history.length > 0) {
+        const timestamps = data.reading_history.map(entry => new Date(entry.read_at).getTime())
+        startReadDate = new Date(Math.min(...timestamps)).toISOString()
+    }
+    delete data.reading_history
+    data.started_at = startReadDate
 
     return data
 }
