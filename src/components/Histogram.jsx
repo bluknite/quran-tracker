@@ -353,14 +353,14 @@ export const Histogram = ({ khatm, refreshTrigger = 0 }) => {
                     ) : (
                         <div className="flex flex-col gap-3">
                             <div>
-                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 text-left mb-1">
-                                    Active for {forecast.daysElapsed} Day{forecast.daysElapsed !== 1 ? 's' : ''} ({forecast.uniqueActiveDays} logged)
-                                </p>
                                 <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 text-left">
                                     Est. Completion: {forecast.minActiveCompletionDate === forecast.maxActiveCompletionDate
                                         ? forecast.minActiveCompletionDate
                                         : `${forecast.minActiveCompletionDate} - ${forecast.maxActiveCompletionDate}`}
                                 </h3>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 text-left mt-1 mb-1">
+                                    Active for {forecast.daysElapsed} Day{forecast.daysElapsed !== 1 ? 's' : ''} ({forecast.uniqueActiveDays} logged)
+                                </p>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
                                     {forecast.minActiveDaysRemaining === forecast.maxActiveDaysRemaining
                                         ? forecast.minActiveDaysRemaining
